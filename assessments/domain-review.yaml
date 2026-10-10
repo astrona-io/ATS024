@@ -1,0 +1,110 @@
+schema_version: 1
+kind: question_bank
+id: ats024-domain-review
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: domain
+  id: domain-review
+  title: Workloads & Scheduling
+placement:
+  position: after
+  reading: sections/section-050/module-02/course-03-summary.md
+questions:
+- id: ats024-domain-review-q01
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate rolling-update limits.
+  source_readings:
+  - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+  prompt: A small Deployment has percentage rollout settings. What must arithmetic account for?
+  options:
+  - id: a
+    text: An assumption that both values always round upward
+    explanation: Unavailability percentage has different rounding.
+  - id: b
+    text: An assumption that percentages name exact request shares
+    explanation: Rollout budgets are not traffic-weight declarations.
+  - id: c
+    text: Different rounding rules for surge and unavailability
+    explanation: Small replica counts make the rounding effect especially relevant.
+  correct_option: c
+  explanation: Small replica counts make the rounding effect especially relevant.
+- id: ats024-domain-review-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish input updates from application reload.
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: A configuration object changes but an existing process keeps its old environment. Why?
+  options:
+  - id: a
+    text: The application automatically changed into a Job
+    explanation: Input updates do not change resource kind.
+  - id: b
+    text: Environment delivery and object update are distinct lifecycle operations
+    explanation: The process needs a designed way to receive the new input.
+  - id: c
+    text: Kubernetes cannot store the new value at all
+    explanation: The object can change without altering the current environment.
+  correct_option: b
+  explanation: The process needs a designed way to receive the new input.
+- id: ats024-domain-review-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish replica scaling from node capacity and bottleneck recovery.
+  source_readings:
+  - sections/section-030/module-01/course-01-metric-driven-replica-decisions-and-their-boundaries.md
+  prompt: Scaling frontends does not improve a saturated external backend. What is the limitation?
+  options:
+  - id: a
+    text: Additional replicas do not necessarily repair the actual bottleneck
+    explanation: The metric and dependency design determine useful scaling.
+  - id: b
+    text: Every autoscaler always increases backend capacity too
+    explanation: That is a separate responsibility.
+  - id: c
+    text: A higher replica count proves all dependencies healthy
+    explanation: Desired capacity does not establish dependency behavior.
+  correct_option: a
+  explanation: The metric and dependency design determine useful scaling.
+- id: ats024-domain-review-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose health checks with appropriate recovery actions.
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: Why avoid identical readiness and liveness criteria without reviewing their meaning?
+  options:
+  - id: a
+    text: They always have no effect on the workload
+    explanation: Configured probe outcomes can affect eligibility or restart.
+  - id: b
+    text: A static page guarantees every operation is healthy
+    explanation: A shallow response can miss important failures.
+  - id: c
+    text: Their actions differ and need conditions suited to those actions
+    explanation: Traffic removal and restart solve different failure responses.
+  correct_option: c
+  explanation: Traffic removal and restart solve different failure responses.
+- id: ats024-domain-review-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret taints and tolerations.
+  source_readings:
+  - sections/section-050/module-01/course-01-filtering-scoring-and-placement-rules.md
+  prompt: A Pod tolerates a taint but still fails placement. What other conditions remain relevant?
+  options:
+  - id: a
+    text: Only the application request path
+    explanation: Routing does not replace scheduling feasibility.
+  - id: b
+    text: Required rules, resource fit and actual node eligibility
+    explanation: Toleration only removes one applicable exclusion.
+  - id: c
+    text: Nothing; toleration guarantees immediate placement
+    explanation: That is not its contract.
+  correct_option: b
+  explanation: Toleration only removes one applicable exclusion.

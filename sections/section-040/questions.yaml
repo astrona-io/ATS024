@@ -1,0 +1,110 @@
+schema_version: 1
+kind: question_bank
+id: ats024-section-040
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-040
+  title: Understand the primitives used to create robust, self-healing, application deployments
+placement:
+  position: after
+  reading: sections/section-040/module-01/course-03-summary.md
+questions:
+- id: ats024-section-040-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose health checks with appropriate recovery actions.
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: Which failure normally changes traffic eligibility without directly restarting the container?
+  options:
+  - id: a
+    text: Repeated liveness failure at its action threshold
+    explanation: Liveness failure can trigger restart.
+  - id: b
+    text: Failed startup checks at their action threshold
+    explanation: Failed startup behavior can also lead to restart.
+  - id: c
+    text: Readiness failure
+    explanation: Readiness expresses whether the workload should receive useful ordinary traffic.
+  correct_option: c
+  explanation: Readiness expresses whether the workload should receive useful ordinary traffic.
+- id: ats024-section-040-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose health checks with appropriate recovery actions.
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: A slow application needs time to initialize before regular health checks act. Which probe fits?
+  options:
+  - id: a
+    text: A Service selector
+    explanation: Selection is not a startup health-check mechanism.
+  - id: b
+    text: A startup probe
+    explanation: It suppresses regular liveness and readiness until its startup condition succeeds.
+  - id: c
+    text: A readiness probe as a universal substitute for startup restart control
+    explanation: Readiness has a different primary action and does not provide the same suppression contract.
+  correct_option: b
+  explanation: It suppresses regular liveness and readiness until its startup condition succeeds.
+- id: ats024-section-040-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose health checks with appropriate recovery actions.
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: What does a successful TCP probe establish most directly?
+  options:
+  - id: a
+    text: A successful connection to the configured port
+    explanation: An open listener does not prove every application operation works.
+  - id: b
+    text: Successful authorization of all report requests
+    explanation: Transport acceptance does not check every business permission.
+  - id: c
+    text: A guarantee that all database writes are correct
+    explanation: The connection check does not validate every backend write.
+  correct_option: a
+  explanation: An open listener does not prove every application operation works.
+- id: ats024-section-040-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose health checks with appropriate recovery actions.
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: A probe times out faster than normal healthy responses. What can result?
+  options:
+  - id: a
+    text: Guaranteed improvement in application latency
+    explanation: Timeout configuration does not make the operation faster.
+  - id: b
+    text: Automatic correction of every dependency
+    explanation: Health checks observe conditions rather than repair all dependencies.
+  - id: c
+    text: False health failures
+    explanation: The timing contract can reject acceptable application behavior.
+  correct_option: c
+  explanation: The timing contract can reject acceptable application behavior.
+- id: ats024-section-040-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose health checks with appropriate recovery actions.
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: Why can database reachability be a poor liveness criterion for all frontends?
+  options:
+  - id: a
+    text: Readiness and liveness always have identical effects
+    explanation: Their actions differ and should be designed accordingly.
+  - id: b
+    text: Restarting frontends may not repair a shared dependency outage
+    explanation: The recovery action should fit the condition and preserve useful capacity.
+  - id: c
+    text: Liveness never restarts a container
+    explanation: Repeated liveness failure can restart it.
+  correct_option: b
+  explanation: The recovery action should fit the condition and preserve useful capacity.

@@ -1,0 +1,111 @@
+schema_version: 1
+kind: question_bank
+id: ats024-section-010
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-010
+  title: Understand application deployments and how to perform rolling update and rollbacks
+placement:
+  position: after
+  reading: sections/section-010/module-01/course-03-summary.md
+questions:
+- id: ats024-section-010-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify Deployment template changes and revisions.
+  source_readings:
+  - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+  prompt: Which change normally starts a Deployment template rollout?
+  options:
+  - id: a
+    text: Only changing an unrelated ConfigMap object
+    explanation: An external object update does not inherently change the Deployment template.
+  - id: b
+    text: Only reading the Deployment status
+    explanation: Inspection does not mutate the desired workload.
+  - id: c
+    text: Changing the container image in the Pod template
+    explanation: A template change creates a new desired replica template and revision.
+  correct_option: c
+  explanation: A template change creates a new desired replica template and revision.
+- id: ats024-section-010-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Calculate rolling-update limits.
+  source_readings:
+  - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+  prompt: With three desired replicas and maxSurge and maxUnavailable both twenty-five percent, which
+    limits apply?
+  options:
+  - id: a
+    text: Exactly three extra Pods and three unavailable Pods
+    explanation: Those values do not follow the stated percentages.
+  - id: b
+    text: One surge Pod and zero unavailable Pods
+    explanation: Surge percentage rounds up while unavailability percentage rounds down.
+  - id: c
+    text: Zero surge Pods and one unavailable Pod
+    explanation: That reverses the applicable rounding behavior.
+  correct_option: b
+  explanation: Surge percentage rounds up while unavailability percentage rounds down.
+- id: ats024-section-010-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain health and capacity effects on progress.
+  source_readings:
+  - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+  prompt: A Deployment reports progress deadline exceeded. What does that establish?
+  options:
+  - id: a
+    text: A reported failure to make required rollout progress
+    explanation: The condition reports the stalled progress; automatic rollback is not implied.
+  - id: b
+    text: The earlier revision has already been restored automatically
+    explanation: The deadline condition does not universally perform rollback.
+  - id: c
+    text: The new image has been deleted from its registry
+    explanation: Deployment progress reporting does not remove image artifacts.
+  correct_option: a
+  explanation: The condition reports the stalled progress; automatic rollback is not implied.
+- id: ats024-section-010-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain health and capacity effects on progress.
+  source_readings:
+  - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+  prompt: Desired updated replicas exist, but available replicas remain low. What should be examined?
+  options:
+  - id: a
+    text: Only the release's human-readable title
+    explanation: A title does not explain the unavailable capacity.
+  - id: b
+    text: Only whether an older Service name exists
+    explanation: That does not locate the new Pods' failed transition.
+  - id: c
+    text: The new Pods' preparation, readiness and availability conditions
+    explanation: Observed availability depends on lifecycle and health beyond desired counts.
+  correct_option: c
+  explanation: Observed availability depends on lifecycle and health beyond desired counts.
+- id: ats024-section-010-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Evaluate rollback compatibility and external state.
+  source_readings:
+  - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+  prompt: Why might restoring an earlier Pod template fail to restore a working release?
+  options:
+  - id: a
+    text: A retained revision guarantees every old dependency still exists
+    explanation: The environment can change outside the retained template.
+  - id: b
+    text: External configuration or data may have changed independently
+    explanation: Template history does not capture every application dependency.
+  - id: c
+    text: Template history always contains a complete database backup
+    explanation: Deployment history is not a database snapshot mechanism.
+  correct_option: b
+  explanation: Template history does not capture every application dependency.
