@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Filtering, Scoring And Placement Rules
 
+A Pod needs an accelerator, but the only idle node lacks its required label. Free CPU does not make that node eligible. Scheduling first satisfies mandatory requirements, then evaluates preferences.
+
+## Learning objectives
+
+- Explain scheduling filters and preferences.
+- Compare required and preferred affinity.
+- Interpret taints and tolerations.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 The `scout` Pod requires a node with an attached accelerator. The scheduler cannot pick any idle machine. It examines unscheduled Pods and first filters out nodes that fail mandatory requirements. It then scores eligible nodes according to configured preferences and selects a suitable node.
 
 A node selector requires matching node labels. Node affinity expresses richer conditions and can distinguish required rules from preferred rules. Required affinity removes unsuitable nodes from consideration. Preferred affinity influences scores but allows placement elsewhere when the preference cannot be satisfied.
@@ -32,6 +46,29 @@ Hard anti-affinity can require replicas to occupy separate nodes. That supports 
 Topology spread constraints offer a way to express distribution across domains and a tolerated imbalance. Their behavior still depends on available domains and whether the rule permits scheduling when its desired balance cannot be met. The important associate-level concept is that distribution is an explicit constraint or preference, not an automatic consequence of increasing replica count.
 
 Evaluate placement by listing the hard filters first, then the preferences among eligible nodes. Include resources and storage topology alongside labels. This makes it possible to explain why a seemingly idle cluster still cannot place a particular workload.
+
+## Work through the decision
+
+Required node affinity and selectors remove non-matching nodes from consideration. Preferred affinity influences scores among feasible choices without making the preference mandatory. Pod affinity and anti-affinity instead relate placement to other Pods under a declared topology key.
+
+Consider a preferred separation across zones with all replicas still able to fit one zone. That is different from a required separation that makes an additional replica unschedulable when no other eligible domain exists. Review node labels, existing Pod placement and resource demand together. Changing a required hardware constraint to force placement can violate the application requirement even when the status becomes Running.
+
+```mermaid
+flowchart TB
+    N0["Pod mandatory requirements"]
+    N1["Feasible node filtering"]
+    N2["Preference scoring"]
+    N3["Node assignment"]
+    N4["Kubelet execution"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+A placement fix must preserve the requirement that made a node suitable, rather than merely produce an assignment.
+
+A placement fix must preserve the requirement that made a node suitable, rather than merely produce an assignment.
 
 ## Common pitfalls
 
