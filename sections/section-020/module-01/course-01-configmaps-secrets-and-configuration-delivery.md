@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # ConfigMaps, Secrets And Configuration Delivery
 
+A ConfigMap changes, but the running process keeps its startup environment value. The object was updated successfully; adoption did not occur through that delivery method. Configuration maintenance needs both delivery and consumption to be explained.
+
+## Learning objectives
+
+- Choose file or environment delivery for configuration.
+- Explain namespace and key references.
+- Distinguish input updates from application reload.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 The `scout` application uses a non-sensitive log level and a sensitive database password. A ConfigMap stores configuration data that is not intended to be secret. A Secret is a Kubernetes resource for sensitive data. Keeping both outside the image lets the same application artifact run with different deployment settings.
 
 A Pod can receive values through environment variables or files mounted from a volume. Environment variables are set when the container starts; updating the source object does not rewrite the environment of that running process. Mounted configuration files can receive updates after a delay, but the application must notice or reload them. A mount using `subPath` does not receive those automatic volume updates.
@@ -30,6 +44,25 @@ For a database password, identify the issuer, the stored Secret, the delivery me
 Environment-based consumers generally need new containers to receive new values. File-based consumers may need application reload. In both cases, readiness and representative requests should confirm that consumers can use the updated credential. Avoid logging the password as proof of adoption; verify authentication behavior without exposing the secret.
 
 A Secret also needs protections beyond its resource name. Read access can reveal the credential, container access can expose mounted files and diagnostic bundles can copy them unintentionally. Handle sensitivity through permissions, storage encryption and application behavior, while preserving a clear plan for how updates become effective.
+
+## Work through the decision
+
+The example mounts its application code from `probe-code`. A ConfigMap is an object for non-confidential configuration data. A volume supplies that data as files, while an environment reference supplies values when the container starts. These delivery paths have different update behavior.
+
+Updating a normal ConfigMap volume can change files after propagation delay, but the application decides whether to reread them. A process started with an environment value retains it until it is replaced or changes it itself. A `subPath` file mount has another limitation: it does not receive the normal ConfigMap volume updates. Identify the precise mount and application behavior before choosing reload or replacement.
+
+```mermaid
+flowchart TB
+    C["ConfigMap content"] --> E["Startup environment"]
+    C --> F["Mounted files"]
+    E --> P["Process input"]
+    F --> L["Application reload behavior"]
+    L --> P
+```
+
+A stored change becomes effective only through its delivery and application consumption paths.
+
+You can now explain why object update success and process adoption differ. A configuration change needs an explicit refresh plan and behavior check that fit its consumer.
 
 ## Common pitfalls
 
