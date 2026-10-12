@@ -8,3 +8,5 @@ exam_objectives:
 Admission can supply defaults or reject unsuitable declarations before ordinary placement. Resource and security policies have distinct contracts and modes.
 
 The effective admitted workload determines later allocation and runtime behavior. Policy acceptance does not guarantee useful capacity, and scheduling failure cannot repair a request that was never admitted.
+
+Policy acceptance and useful protected execution require different evidence and different corrections.
