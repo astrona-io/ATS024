@@ -1,0 +1,160 @@
+version: 1
+approval: CKA requested 2026-10-11; established reading-only scope
+course:
+  id: ATS024
+  certification:
+    name: Certified Kubernetes Administrator
+    code: CKA
+    provider: CNCF / Linux Foundation
+    domain: Workloads & Scheduling
+    weight: 15
+    competencies:
+    - Understand application deployments and how to perform rolling update and rollbacks
+    - Use ConfigMaps and Secrets to configure applications
+    - Configure workload autoscaling
+    - Understand the primitives used to create robust, self-healing, application deployments
+    - Configure Pod admission and scheduling (limits, node affinity, etc.)
+defaults:
+  playground: false
+  module_lab: false
+  capstone: false
+  section_quiz: true
+  final_quiz: true
+assessment_format: YAML question banks, schema version 1; indexed in assessments/index.yaml
+sections:
+- id: section-010
+  title: Understand application deployments and how to perform rolling update and rollbacks
+  curriculum_item: Understand application deployments and how to perform rolling update and rollbacks
+  capstone: false
+  section_quiz: true
+  modules:
+  - id: module-01
+    title: Rolling Replacement And Recovery
+    objectives:
+    - Identify Deployment template changes and revisions.
+    - Calculate rolling-update limits.
+    - Explain health and capacity effects on progress.
+    - Evaluate rollback compatibility and external state.
+    outline:
+    - Rolling Updates And Health Gates
+    - Calculating Rollout Capacity And Diagnosing Progress
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
+      adapted_from: ATS001/sections/section-020/module-03/course-01-rolling-updates-and-health-gates.md
+    - reading: sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+      adapted_from: ATS001/sections/section-020/module-03/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+- id: section-020
+  title: Use ConfigMaps and Secrets to configure applications
+  curriculum_item: Use ConfigMaps and Secrets to configure applications
+  capstone: false
+  section_quiz: true
+  modules:
+  - id: module-01
+    title: Configuration And Confidential Input Delivery
+    objectives:
+    - Choose file or environment delivery for configuration.
+    - Explain namespace and key references.
+    - Distinguish input updates from application reload.
+    - Evaluate confidentiality, indirect access and rotation.
+    outline:
+    - ConfigMaps, Secrets And Configuration Delivery
+    - Secret Storage, Delivery And Rotation
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+      adapted_from: ATS037/sections/section-020/module-02/course-01-configmaps-secrets-and-configuration-delivery.md
+    - reading: sections/section-020/module-01/course-02-secret-storage-delivery-and-rotation.md
+      adapted_from: ATS043/sections/section-050/module-01/course-01-secret-storage-delivery-and-rotation.md
+- id: section-030
+  title: Configure workload autoscaling
+  curriculum_item: Configure workload autoscaling
+  capstone: false
+  section_quiz: true
+  modules:
+  - id: module-01
+    title: Workload Autoscaling And Useful Capacity
+    objectives:
+    - Identify autoscaling target and metric requirements.
+    - Interpret utilization relative to requests.
+    - Explain stabilization and minimum or maximum bounds.
+    - Distinguish replica scaling from node capacity and bottleneck recovery.
+    outline:
+    - Metric-Driven Replica Decisions And Their Boundaries
+    - Replica Autoscaling And Availability
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-030/module-01/course-01-metric-driven-replica-decisions-and-their-boundaries.md
+      adapted_from: null
+    - reading: sections/section-030/module-01/course-02-replica-autoscaling-and-availability.md
+      adapted_from: ATS037/sections/section-030/module-02/course-02-replica-autoscaling-and-availability.md
+    diagrams:
+    - type: flowchart
+      reading: sections/section-030/module-01/course-01-metric-driven-replica-decisions-and-their-boundaries.md
+      purpose: Show the component dependencies described in this lesson.
+- id: section-040
+  title: Understand the primitives used to create robust, self-healing, application deployments
+  curriculum_item: Understand the primitives used to create robust, self-healing, application deployments
+  capstone: false
+  section_quiz: true
+  modules:
+  - id: module-01
+    title: Reconciliation And Application Health
+    objectives:
+    - Explain owner-driven replacement and desired state.
+    - Distinguish process startup from useful service.
+    - Choose health checks with appropriate recovery actions.
+    - Identify dependencies that replacement cannot repair.
+    outline:
+    - Desired State And Reconciliation
+    - Designing Startup, Readiness And Liveness Checks
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-040/module-01/course-01-desired-state-and-reconciliation.md
+      adapted_from: ATS037/sections/section-010/module-01/course-02-desired-state-and-reconciliation.md
+    - reading: sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+      adapted_from: ATS028/sections/section-020/module-01/course-01-designing-startup-readiness-and-liveness-checks.md
+- id: section-050
+  title: Configure Pod admission and scheduling (limits, node affinity, etc.)
+  curriculum_item: Configure Pod admission and scheduling (limits, node affinity, etc.)
+  capstone: false
+  section_quiz: true
+  modules:
+  - id: module-01
+    title: Placement Rules And Node Eligibility
+    objectives:
+    - Explain scheduling filters and preferences.
+    - Compare required and preferred affinity.
+    - Interpret taints and tolerations.
+    - Diagnose eligibility separately from available capacity.
+    outline:
+    - Filtering, Scoring And Placement Rules
+    - Taints, Tolerations And Eligibility
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-050/module-01/course-01-filtering-scoring-and-placement-rules.md
+      adapted_from: ATS037/sections/section-030/module-01/course-01-filtering-scoring-and-placement-rules.md
+    - reading: sections/section-050/module-01/course-02-taints-tolerations-and-eligibility.md
+      adapted_from: ATS037/sections/section-030/module-01/course-02-taints-tolerations-and-eligibility.md
+  - id: module-02
+    title: Admission And Resource Constraints
+    objectives:
+    - Explain defaults, quota and resource requirement admission.
+    - Distinguish policy rejection from scheduler placement.
+    - Evaluate complete container resource needs.
+    - Interpret security profile enforcement and exceptions.
+    outline:
+    - Expressing Resource Needs For Every Container
+    - Applying Pod Security Requirements At Admission
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-050/module-02/course-01-expressing-resource-needs-for-every-container.md
+      adapted_from: ATS029/sections/section-050/module-01/course-01-expressing-resource-needs-for-every-container.md
+    - reading: sections/section-050/module-02/course-02-applying-pod-security-requirements-at-admission.md
+      adapted_from: ATS043/sections/section-020/module-01/course-01-applying-pod-security-requirements-at-admission.md
