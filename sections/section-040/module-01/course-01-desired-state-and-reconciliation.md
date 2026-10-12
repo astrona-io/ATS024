@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Desired State And Reconciliation
 
+A controller replaces a lost application Pod, but the replacement cannot mount its storage. Reconciliation created the requested object while a later dependency prevented readiness.
+
+## Learning objectives
+
+- Explain owner-driven replacement and desired state.
+- Distinguish process startup from useful service.
+- Choose health checks with appropriate recovery actions.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 The `scout` application needs three replicas, but only two Pods remain after a failure. A replica is one copy of the workload. Kubernetes uses a controller to compare the desired replica count with the current objects and request another Pod. This repeated comparison and correction is reconciliation.
 
 A resource's specification describes desired behavior. Its status records what the system currently observes. Accepting a resource request does not prove that its containers are ready. The controller, scheduler and kubelet still need to act, and each can encounter conditions that prevent progress. A missing image, insufficient node capacity or an unavailable volume can stop a valid request from becoming a running workload.
@@ -30,6 +44,29 @@ A direct edit to a managed Pod can also be temporary. If the owning controller l
 Reconciliation works only for the state a controller knows how to manage. A Deployment can request another web process, but it cannot infer which unfinished customer transaction that process held in memory. The application needs durable records and safe retry behavior to handle that loss.
 
 Likewise, a controller may continually retry a desired change that the environment cannot satisfy. The repeated effort is useful because a missing dependency might later return, but it is not proof that the request is achievable. A practical explanation identifies the managed state, the corrective action and the dependency that still prevents completion.
+
+## Work through the decision
+
+A specification describes requested state, and status describes current observations. A controller compares them and acts within its responsibility. For a Deployment, ReplicaSet ownership explains why deleting one child does not erase the required population.
+
+The new Pod has a new identity, even if it serves the same application name. Scheduling, image access, storage and startup are later transitions with their own failures. Reconciliation is repeated correction toward an achievable declaration, not instant application repair. It cannot restore external data or correct a business calculation unless a specific implementation manages that requirement.
+
+```mermaid
+flowchart TB
+    N0["Desired specification"]
+    N1["Controller comparison"]
+    N2["Managed object change"]
+    N3["Dependency-dependent execution"]
+    N4["Observed status"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+Reconciliation connects declared intent with observed state, while independent dependencies constrain what can actually be achieved.
+
+Reconciliation connects declared intent with observed state, while independent dependencies constrain what can actually be achieved.
 
 ## Common pitfalls
 
