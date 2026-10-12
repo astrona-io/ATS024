@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Configure workload autoscaling
 
-This section covers configure workload autoscaling. You will study Workload Autoscaling And Useful Capacity. The lessons explain the responsible components, configuration relationships and failure cases relevant to application development.
+Two replicas average one hundred percent CPU utilization against a fifty percent target. The simplified calculation suggests four replicas, but useful capacity still needs metrics, scheduling and readiness.
+
+The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
 
 Each module begins with its goals and ends with a summary. Reusable YAML knowledge checks follow the section summary and are registered separately for future presentation.
 
