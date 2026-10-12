@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Replica Autoscaling And Availability
 
+An autoscaler requests ten replicas, but only six fit on the current nodes. Application scaling succeeded as a decision while physical capacity remains a separate constraint.
+
+## Learning objectives
+
+- Identify autoscaling target and metric requirements.
+- Interpret utilization relative to requests.
+- Explain stabilization and minimum or maximum bounds.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 Traffic to `scout` increases. Adding more application replicas can share requests if the application and its dependencies support parallel work. The Horizontal Pod Autoscaler (HPA) adjusts the replica count of a supported target according to configured metrics and a control loop.
 
 For CPU utilization targets, utilization is measured relative to resource requests. A metrics provider supplies observations; the autoscaler compares them with its target and calculates a desired replica count within configured bounds. Missing metrics or requests can prevent the expected calculation. Scaling decisions also use timing and stabilization behavior rather than responding instantly to every fluctuation.
@@ -39,6 +53,29 @@ Horizontal scaling changes the number of instances. Vertical sizing changes the 
 A replica increase can encounter Pending Pods because the node pool is full. A node increase can create unused capacity if the application is still capped at a low maximum replica count. Enlarging a container request can improve its resource allocation while reducing how many replicas fit on each node.
 
 Availability requires these controls to agree with readiness and placement. Disruption budgets can limit supported maintenance removals, but they cannot replace capacity after involuntary loss. A clear scaling explanation identifies the metric or requirement, the value being changed and the stage where the additional capacity becomes useful.
+
+## Work through the decision
+
+Horizontal scaling changes replica population. Node scaling changes where that population can run. Vertical sizing changes per-workload resource declarations. These mechanisms can complement each other, but none should be inferred from the existence of another.
+
+Suppose the real bottleneck is one database lock. More request handlers can increase pressure without increasing completed operations. Measure the constrained operation, then choose a scaling action that supplies useful capacity. A PodDisruptionBudget constrains supported voluntary disruptions rather than supplying spare nodes or protecting against every failure. Maintenance must be evaluated against actual available replicas and their dependencies.
+
+```mermaid
+flowchart TB
+    N0["Demand measurement"]
+    N1["Replica scaling decision"]
+    N2["Node capacity"]
+    N3["Ready backend population"]
+    N4["Completed application work"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+Availability depends on useful replicas and resilient dependencies, not on desired replica count alone.
+
+Availability depends on useful replicas and resilient dependencies, not on desired replica count alone.
 
 ## Common pitfalls
 

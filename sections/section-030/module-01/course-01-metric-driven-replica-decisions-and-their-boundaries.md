@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Metric-Driven Replica Decisions And Their Boundaries
 
+Two replicas average one hundred percent CPU utilization against a fifty percent target. The simplified calculation suggests four replicas, but useful capacity still needs metrics, scheduling and readiness.
+
+## Learning objectives
+
+- Identify autoscaling target and metric requirements.
+- Interpret utilization relative to requests.
+- Explain stabilization and minimum or maximum bounds.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 The HorizontalPodAutoscaler, or HPA, adjusts a supported workload's desired replica count from configured metrics. It does not directly create more nodes or rewrite every container's resource limit. Scaling decisions depend on metric availability, target interpretation and the workload's ability to provide useful capacity after replicas are added.
 
 ## Identify The Scaling Target
@@ -49,6 +63,29 @@ flowchart TB
     controller --> capacity["Placement, preparation and readiness"]
     capacity --> service["Useful application capacity"]
 ```
+
+## Work through the decision
+
+The HorizontalPodAutoscaler (HPA) uses an observed-to-target relationship to adjust the target workload's scale. Central processing unit (CPU) utilization uses the relevant resource requests as a denominator. Missing metrics or required requests can prevent a meaningful percentage calculation.
+
+Under the simplified model, multiply current replicas by observed utilization divided by target utilization and round upward. Real behavior also considers tolerance, missing observations, readiness and configured stabilization. The resulting desired replicas are intent: the workload controller must create Pods, nodes must fit them, and the application must serve useful work. The HPA does not directly add nodes or repair a saturated database.
+
+```mermaid
+flowchart TB
+    N0["Metrics and request denominator"]
+    N1["HPA decision and bounds"]
+    N2["Desired workload scale"]
+    N3["Schedulable ready replicas"]
+    N4["Useful application capacity"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+A scale decision becomes useful only when the resulting replicas can run and relieve the actual bottleneck.
+
+A scale decision becomes useful only when the resulting replicas can run and relieve the actual bottleneck.
 
 ## Common pitfalls
 
