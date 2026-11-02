@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: taint-reader
+  namespace: starfleet
+spec:
+  restartPolicy: Never
+  containers:
+  - name: reader
+    image: docker.io/library/busybox:1.37.0
+    command:
+    - sh
+    - -c
+    - sleep 3600
+  nodeSelector:
+    kubernetes.io/hostname: astro-ats-024-lab-050-01-02-worker
+  tolerations:
+  - key: training.astrona.io/dedicated
+    operator: Equal
+    value: report
+    effect: NoSchedule
