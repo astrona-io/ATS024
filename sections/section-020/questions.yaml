@@ -1,0 +1,111 @@
+schema_version: 1
+kind: question_bank
+id: ats024-section-020
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-020
+  title: Use ConfigMaps and Secrets to configure applications
+placement:
+  position: after
+  reading: sections/section-020/module-01/course-03-summary.md
+questions:
+- id: ats024-section-020-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose file or environment delivery for configuration.
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: An application reads configuration from environment variables. What normally changes those values
+    for a running process?
+  options:
+  - id: a
+    text: Every ConfigMap edit immediately changes all process variables
+    explanation: Environment delivery does not have that live-update behavior.
+  - id: b
+    text: A Service endpoint update
+    explanation: Routing changes do not replace process environment variables.
+  - id: c
+    text: A new process startup with the intended delivered environment
+    explanation: Changing the ConfigMap alone does not rewrite the current process environment.
+  correct_option: c
+  explanation: Changing the ConfigMap alone does not rewrite the current process environment.
+- id: ats024-section-020-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain namespace and key references.
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: A workload refers to a required key absent from its ConfigMap. What is the relevant review?
+  options:
+  - id: a
+    text: Only the chart's descriptive appVersion
+    explanation: Metadata does not guarantee the referenced object contains the input.
+  - id: b
+    text: The referenced object, namespace and key contract
+    explanation: Configuration delivery depends on valid references and required data.
+  - id: c
+    text: Only the Ingress certificate name
+    explanation: External TLS identity does not supply a missing configuration key.
+  correct_option: b
+  explanation: Configuration delivery depends on valid references and required data.
+- id: ats024-section-020-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish input updates from application reload.
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: A mounted ConfigMap file changes. What additional condition determines useful application change?
+  options:
+  - id: a
+    text: Whether and how the application reloads that file
+    explanation: File delivery and process consumption are separate behaviors.
+  - id: b
+    text: A guarantee that every process reloads all files instantly
+    explanation: Reload behavior belongs to the application contract.
+  - id: c
+    text: A guarantee that the Deployment revision changed
+    explanation: A fixed-name object update need not change the Pod template.
+  correct_option: a
+  explanation: File delivery and process consumption are separate behaviors.
+- id: ats024-section-020-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain namespace and key references.
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: The delivered backend address has the wrong format for the application. What can happen?
+  options:
+  - id: a
+    text: Kubernetes automatically rewrites every application format
+    explanation: The platform does not universally understand arbitrary value formats.
+  - id: b
+    text: The ConfigMap becomes a Secret automatically
+    explanation: Object kind does not change to repair incompatible application values.
+  - id: c
+    text: Requests fail despite the configuration object existing
+    explanation: Storage of a value does not prove it meets the application's expected input.
+  correct_option: c
+  explanation: Storage of a value does not prove it meets the application's expected input.
+- id: ats024-section-020-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish input updates from application reload.
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: Why can a single-file subPath configuration mount need special update consideration?
+  options:
+  - id: a
+    text: All ConfigMap updates are database migrations
+    explanation: Configuration updates do not necessarily alter application data schemas.
+  - id: b
+    text: Its update behavior differs from assuming every projected file refreshes identically
+    explanation: The mount mechanism affects propagation and reload expectations.
+  - id: c
+    text: All subPath mounts automatically restart the Deployment
+    explanation: Mount refresh does not provide that universal rollout trigger.
+  correct_option: b
+  explanation: The mount mechanism affects propagation and reload expectations.
