@@ -38,7 +38,7 @@ modules:
     rollbacks
   description: Developed explanations and application reasoning for Understand application
     deployments and how to perform rolling update and rollbacks.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Understand application deployments and how to perform rolling update and
@@ -99,7 +99,7 @@ modules:
   title: Use ConfigMaps and Secrets to configure applications
   description: Developed explanations and application reasoning for Use ConfigMaps
     and Secrets to configure applications.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Use ConfigMaps and Secrets to configure applications
@@ -159,7 +159,7 @@ modules:
   title: Configure workload autoscaling
   description: Developed explanations and application reasoning for Configure workload
     autoscaling.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Configure workload autoscaling
@@ -202,7 +202,7 @@ modules:
     deployments
   description: Developed explanations and application reasoning for Understand the
     primitives used to create robust, self-healing, application deployments.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Understand the primitives used to create robust, self-healing, application
@@ -263,7 +263,7 @@ modules:
   title: Configure Pod admission and scheduling (limits, node affinity, etc.)
   description: Developed explanations and application reasoning for Configure Pod
     admission and scheduling (limits, node affinity, etc.).
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Configure Pod admission and scheduling (limits, node affinity, etc.)
