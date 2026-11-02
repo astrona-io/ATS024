@@ -1,9 +1,9 @@
-# Reading-only course. YAML assessments are registered separately in assessments/index.yaml.
 training:
   id: ATS024
   title: 'CKA: Workloads & Scheduling'
-  description: Detailed reading lessons and reusable YAML knowledge checks covering the CKA domain. No
-    new labs or playgrounds. Technical content remains draft for review.
+  description: Detailed reading lessons and reusable YAML knowledge checks covering
+    the CKA domain. No new labs or playgrounds. Technical content remains draft for
+    review.
   certification:
     name: Certified Kubernetes Administrator
     code: CKA
@@ -34,13 +34,15 @@ modules:
     title: How This Course Is Made
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
-  title: Understand application deployments and how to perform rolling update and rollbacks
-  description: Developed explanations and application reasoning for Understand application deployments
-    and how to perform rolling update and rollbacks.
-  draft: true
+  title: Understand application deployments and how to perform rolling update and
+    rollbacks
+  description: Developed explanations and application reasoning for Understand application
+    deployments and how to perform rolling update and rollbacks.
+  status: alpha
   content:
   - type: reading
-    title: Understand application deployments and how to perform rolling update and rollbacks
+    title: Understand application deployments and how to perform rolling update and
+      rollbacks
     path: sections/section-010/README.md
   - type: reading
     title: Rolling Replacement And Recovery
@@ -49,16 +51,55 @@ modules:
     title: Rolling Updates And Health Gates
     path: sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
   - type: reading
+    title: Perform A Rolling Template Update — Task
+    path: sections/section-010/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Perform A Rolling Template Update
+    path: sections/section-010/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: rolling-update
+    task_kind: build
+    learning_goals:
+    - Complete a readiness-gated update with explicit rollout capacity.
+    tags:
+    - cka
+    - rolling-update
+  - type: reading
+    title: Perform A Rolling Template Update — Solution
+    path: sections/section-010/module-01/labs/lab-01/solution.md
+  - type: reading
     title: Calculating Rollout Capacity And Diagnosing Progress
     path: sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
   - type: reading
+    title: Recover A Failed Deployment Update — Task
+    path: sections/section-010/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Recover A Failed Deployment Update
+    path: sections/section-010/module-01/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: rollout
+    task_kind: build
+    learning_goals:
+    - Restore two available replicas by correcting a failed Deployment image update.
+    tags:
+    - cka
+    - rollout
+  - type: reading
+    title: Recover A Failed Deployment Update — Solution
+    path: sections/section-010/module-01/labs/lab-02/solution.md
+  - type: reading
+    title: 'Guided Practice: Perform A Rolling Template Update'
+    path: sections/section-010/module-01/course-03-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-03-summary.md
+    path: sections/section-010/module-01/course-04-summary.md
 - id: module-020
   title: Use ConfigMaps and Secrets to configure applications
-  description: Developed explanations and application reasoning for Use ConfigMaps and Secrets to configure
-    applications.
-  draft: true
+  description: Developed explanations and application reasoning for Use ConfigMaps
+    and Secrets to configure applications.
+  status: alpha
   content:
   - type: reading
     title: Use ConfigMaps and Secrets to configure applications
@@ -70,15 +111,55 @@ modules:
     title: ConfigMaps, Secrets And Configuration Delivery
     path: sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
   - type: reading
+    title: Consume A Mounted ConfigMap — Task
+    path: sections/section-020/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Consume A Mounted ConfigMap
+    path: sections/section-020/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: mounted-configmap
+    task_kind: build
+    learning_goals:
+    - Mount non-secret configuration and verify the application actually reads it.
+    tags:
+    - cka
+    - mounted-configmap
+  - type: reading
+    title: Consume A Mounted ConfigMap — Solution
+    path: sections/section-020/module-01/labs/lab-01/solution.md
+  - type: reading
     title: Secret Storage, Delivery And Rotation
     path: sections/section-020/module-01/course-02-secret-storage-delivery-and-rotation.md
   - type: reading
+    title: Consume A Secret Without Printing It — Task
+    path: sections/section-020/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Consume A Secret Without Printing It
+    path: sections/section-020/module-01/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: secret-consumption
+    task_kind: build
+    learning_goals:
+    - Use both a required Secret key reference and a read-only Secret volume.
+    tags:
+    - cka
+    - secret-consumption
+  - type: reading
+    title: Consume A Secret Without Printing It — Solution
+    path: sections/section-020/module-01/labs/lab-02/solution.md
+  - type: reading
+    title: 'Guided Practice: Consume A Mounted ConfigMap'
+    path: sections/section-020/module-01/course-03-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-03-summary.md
+    path: sections/section-020/module-01/course-04-summary.md
 - id: module-030
   title: Configure workload autoscaling
-  description: Developed explanations and application reasoning for Configure workload autoscaling.
-  draft: true
+  description: Developed explanations and application reasoning for Configure workload
+    autoscaling.
+  status: alpha
   content:
   - type: reading
     title: Configure workload autoscaling
@@ -93,16 +174,39 @@ modules:
     title: Replica Autoscaling And Availability
     path: sections/section-030/module-01/course-02-replica-autoscaling-and-availability.md
   - type: reading
+    title: Configure A Metrics-Backed Autoscaler — Task
+    path: sections/section-030/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Configure A Metrics-Backed Autoscaler
+    path: sections/section-030/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: hpa
+    task_kind: build
+    learning_goals:
+    - Declare a resource-utilization target and verify that the controller reads measurements.
+    tags:
+    - cka
+    - hpa
+  - type: reading
+    title: Configure A Metrics-Backed Autoscaler — Solution
+    path: sections/section-030/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Configure A Metrics-Backed Autoscaler'
+    path: sections/section-030/module-01/course-03-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-03-summary.md
+    path: sections/section-030/module-01/course-04-summary.md
 - id: module-040
-  title: Understand the primitives used to create robust, self-healing, application deployments
-  description: Developed explanations and application reasoning for Understand the primitives used to
-    create robust, self-healing, application deployments.
-  draft: true
+  title: Understand the primitives used to create robust, self-healing, application
+    deployments
+  description: Developed explanations and application reasoning for Understand the
+    primitives used to create robust, self-healing, application deployments.
+  status: alpha
   content:
   - type: reading
-    title: Understand the primitives used to create robust, self-healing, application deployments
+    title: Understand the primitives used to create robust, self-healing, application
+      deployments
     path: sections/section-040/README.md
   - type: reading
     title: Reconciliation And Application Health
@@ -114,13 +218,52 @@ modules:
     title: Designing Startup, Readiness And Liveness Checks
     path: sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
   - type: reading
+    title: Repair Readiness Without Removing It — Task
+    path: sections/section-040/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Repair Readiness Without Removing It
+    path: sections/section-040/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: readiness-probe
+    task_kind: build
+    learning_goals:
+    - Restore endpoint eligibility by repairing a readiness probe port.
+    tags:
+    - cka
+    - readiness-probe
+  - type: reading
+    title: Repair Readiness Without Removing It — Solution
+    path: sections/section-040/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: Repair A Liveness Probe Port — Task
+    path: sections/section-040/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Repair A Liveness Probe Port
+    path: sections/section-040/module-01/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: liveness-probe
+    task_kind: build
+    learning_goals:
+    - Restore a valid health check while retaining restart protection and readiness.
+    tags:
+    - cka
+    - liveness-probe
+  - type: reading
+    title: Repair A Liveness Probe Port — Solution
+    path: sections/section-040/module-01/labs/lab-02/solution.md
+  - type: reading
+    title: 'Guided Practice: Repair Readiness Without Removing It'
+    path: sections/section-040/module-01/course-03-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-03-summary.md
+    path: sections/section-040/module-01/course-04-summary.md
 - id: module-050
   title: Configure Pod admission and scheduling (limits, node affinity, etc.)
-  description: Developed explanations and application reasoning for Configure Pod admission and scheduling
-    (limits, node affinity, etc.).
-  draft: true
+  description: Developed explanations and application reasoning for Configure Pod
+    admission and scheduling (limits, node affinity, etc.).
+  status: alpha
   content:
   - type: reading
     title: Configure Pod admission and scheduling (limits, node affinity, etc.)
@@ -132,11 +275,52 @@ modules:
     title: Filtering, Scoring And Placement Rules
     path: sections/section-050/module-01/course-01-filtering-scoring-and-placement-rules.md
   - type: reading
+    title: Repair An Impossible Node Selector — Task
+    path: sections/section-050/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Repair An Impossible Node Selector
+    path: sections/section-050/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: scheduling
+    task_kind: build
+    learning_goals:
+    - Use node labels and scheduling evidence to correct an unsatisfiable placement
+      rule.
+    tags:
+    - cka
+    - scheduling
+  - type: reading
+    title: Repair An Impossible Node Selector — Solution
+    path: sections/section-050/module-01/labs/lab-01/solution.md
+  - type: reading
     title: Taints, Tolerations And Eligibility
     path: sections/section-050/module-01/course-02-taints-tolerations-and-eligibility.md
   - type: reading
+    title: Tolerate A Dedicated Worker Taint — Task
+    path: sections/section-050/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Tolerate A Dedicated Worker Taint
+    path: sections/section-050/module-01/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: taints-tolerations
+    task_kind: build
+    learning_goals:
+    - Make a workload eligible for a deliberately tainted worker without removing
+      the taint.
+    tags:
+    - cka
+    - taints-tolerations
+  - type: reading
+    title: Tolerate A Dedicated Worker Taint — Solution
+    path: sections/section-050/module-01/labs/lab-02/solution.md
+  - type: reading
+    title: 'Guided Practice: Repair An Impossible Node Selector'
+    path: sections/section-050/module-01/course-03-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-050/module-01/course-03-summary.md
+    path: sections/section-050/module-01/course-04-summary.md
   - type: reading
     title: Admission And Resource Constraints
     path: sections/section-050/module-02/course.md
@@ -147,5 +331,26 @@ modules:
     title: Applying Pod Security Requirements At Admission
     path: sections/section-050/module-02/course-02-applying-pod-security-requirements-at-admission.md
   - type: reading
+    title: Enforce Restricted Pod Admission — Task
+    path: sections/section-050/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Enforce Restricted Pod Admission
+    path: sections/section-050/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: pod-security-admission
+    task_kind: build
+    learning_goals:
+    - Admit a compliant Pod and reject a privileged Pod through the API server.
+    tags:
+    - cka
+    - pod-security-admission
+  - type: reading
+    title: Enforce Restricted Pod Admission — Solution
+    path: sections/section-050/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Enforce Restricted Pod Admission'
+    path: sections/section-050/module-02/course-03-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-050/module-02/course-03-summary.md
+    path: sections/section-050/module-02/course-04-summary.md
