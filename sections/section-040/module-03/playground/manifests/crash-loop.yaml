@@ -1,0 +1,26 @@
+# shuttle: restartPolicy Always, exits with code 1 after a few seconds, so the
+# kubelet restarts it with a growing delay (CrashLoopBackOff).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  restartPolicy: Always
+  containers:
+    - name: shuttle
+      image: docker.io/library/busybox:1.37.0
+      command: ["sh", "-c", "echo starting; sleep 3; echo failing >&2; exit 1"]
+---
+# drifter: same command, restartPolicy Never, so the kubelet never restarts it.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drifter
+  namespace: outpost
+spec:
+  restartPolicy: Never
+  containers:
+    - name: drifter
+      image: docker.io/library/busybox:1.37.0
+      command: ["sh", "-c", "echo starting; sleep 3; echo failing >&2; exit 1"]

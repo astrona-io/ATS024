@@ -5,21 +5,23 @@ exam_objectives:
 ---
 # Configuration And Confidential Input Delivery
 
-This module develops configuration And Confidential Input Delivery. It connects the intended application behavior to declared resources and observed conditions.
+An application needs settings and credentials that change between environments. Baking them into the image forces a rebuild for every change, and writing them into a manifest makes the secret values visible to everyone who can read the manifest. ConfigMaps and Secrets keep this input in separate objects, and the kubelet delivers it to the container as files or as environment variables. This module explains how the two objects are stored, how the kubelet delivers them, and which parts of that delivery update while a Pod runs.
 
-## Learning Goals
+## Learning goals
+
+After this module you can:
 
 - Choose file or environment delivery for configuration.
 - Explain namespace and key references.
 - Distinguish input updates from application reload.
 - Evaluate confidentiality, indirect access and rotation.
 
-## Before You Start
+## Before you start
 
-Examples describe system behavior. No runtime is required. Read each field or diagnostic name as part of the stated contract.
+You need a basic understanding of Pods and Deployments. The playground is a single-node `kind` cluster with Kubernetes 1.35. Start it now and keep it running while you read. The graded labs of this module use independent environments.
 
-## Reading Order
+## Reading order
 
-1. ConfigMaps, Secrets And Configuration Delivery
-2. Secret Storage, Delivery And Rotation
-3. Summary
+The first part covers ConfigMaps, Secrets and how the kubelet delivers them. The second part covers how Secrets are stored and how a rotation reaches a running container. The third part is a guided practice that consumes a mounted ConfigMap, and the module ends with a summary.
+
+<!-- astrona:playground -->

@@ -1,0 +1,48 @@
+{
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "prod-beacon",
+      "namespace": "outpost",
+      "expected": {
+        "metadata": {
+          "labels": {
+            "env": "prod"
+          }
+        },
+        "spec": {
+          "replicas": 3,
+          "selector": {
+            "matchLabels": {
+              "app": "beacon"
+            }
+          },
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "beacon",
+                "env": "prod"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "beacon",
+                  "image": "docker.io/library/busybox:1.37.0",
+                  "command": [
+                    "sh",
+                    "-c",
+                    "sleep 3600"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    }
+  ],
+  "behavior": [],
+  "context": "kind-astro-ats-024-lab-010-04-01"
+}

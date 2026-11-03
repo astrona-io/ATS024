@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+      - name: shuttle
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - sleep 3600
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 128Mi
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CPU_MILLI
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.cpu
+              divisor: 1m
+        volumeMounts:
+        - name: shuttle-files
+          mountPath: /etc/shuttle
+          readOnly: true
+      volumes:
+      - name: shuttle-files
+        projected:
+          sources:
+          - configMap:
+              name: shuttle-config
+              items:
+              - key: flags
+                path: flags.conf
+          - secret:
+              name: shuttle-token
+              items:
+              - key: token
+                path: secrets/token
+                mode: 0400
+          - downwardAPI:
+              items:
+              - path: pod/labels
+                fieldRef:
+                  fieldPath: metadata.labels

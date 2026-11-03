@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Pod Lifecycle And Restart Behavior (PLAYGROUND). Ungraded sandbox: a crash-looping
+# Pod, a Pod with an init container, a Pod with a native sidecar and a Pod with
+# a preStop hook. No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-playground-040-03
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+
+bootstrap:
+  manifests:
+    - name: namespaces
+      type: file
+      source: manifests/namespaces.yaml
+    - name: crash-loop
+      type: file
+      source: manifests/crash-loop.yaml
+    - name: init-container
+      type: file
+      source: manifests/init-container.yaml
+    - name: sidecar
+      type: file
+      source: manifests/sidecar.yaml
+    - name: graceful-stop
+      type: file
+      source: manifests/graceful-stop.yaml
+  waitFor:
+    - resource: pod/scout
+      namespace: starfleet
+    - resource: pod/probe
+      namespace: starfleet
+    - resource: pod/bridge
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

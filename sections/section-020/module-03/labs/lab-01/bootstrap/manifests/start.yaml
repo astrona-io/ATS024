@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+  labels:
+    project: ckad
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+  labels:
+    project: outpost
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: builder
+  namespace: starfleet
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: registry-creds
+  namespace: starfleet
+type: Opaque
+stringData:
+  .dockerconfigjson: '{"auths":{"registry.old.example":{"username":"scout","password":"old-pass"}}}'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+      - name: probe
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - sleep 3600

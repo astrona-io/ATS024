@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+# Job scan-report: fails on its first attempt and has no retry (restartPolicy Never, backoffLimit 0).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: scan-report
+  namespace: starfleet
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      volumes:
+      - name: data
+        emptyDir: {}
+      containers:
+      - name: scan
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - 'if [ -f /data/attempt ]; then echo scan finished; exit 0; fi; touch /data/attempt; echo first attempt fails; exit 1'
+        volumeMounts:
+        - name: data
+          mountPath: /data
+---
+# CronJob fleet-report: suspended, may overlap, no start deadline, keeps 50 finished Jobs of each kind.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fleet-report
+  namespace: starfleet
+spec:
+  schedule: "* * * * *"
+  suspend: true
+  concurrencyPolicy: Allow
+  successfulJobsHistoryLimit: 50
+  failedJobsHistoryLimit: 50
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: report
+            image: docker.io/library/busybox:1.37.0
+            command: ["sh", "-c", "echo fleet report; sleep 90"]

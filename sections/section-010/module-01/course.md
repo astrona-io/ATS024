@@ -16,10 +16,12 @@ This module develops rolling Replacement And Recovery. It connects the intended 
 
 ## Before You Start
 
-Examples describe system behavior. No runtime is required. Read each field or diagnostic name as part of the stated contract.
+Use the module playground for guided practice. Graded exercises use independent environments and follow the readings they practise.
 
 ## Reading Order
 
 1. Rolling Updates And Health Gates
 2. Calculating Rollout Capacity And Diagnosing Progress
 3. Summary
+
+<!-- astrona:playground -->

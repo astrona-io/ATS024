@@ -5,10 +5,10 @@ exam_objectives:
 ---
 # Summary
 
-ConfigMaps and Secrets connect declared input objects to application consumers. Mounted files and process environments have different update contracts, and the application determines usable reload behavior.
+ConfigMaps and Secrets connect declared input objects to application consumers. The kubelet delivers the data, and it does so in two ways: as files in a mounted volume and as environment variables set at container start. The two ways have different update behavior.
 
-Secret encoding is not encryption and resource choice does not remove every exposure path. Delivery, storage access, consuming workloads and credential rotation require a coordinated protection design.
+A mounted volume changes after the kubelet sync, through an atomic link swap, but the application must read the file again. An environment variable and a `subPath` mount keep the value they received at start, so a rollout is needed to change them.
 
-You can now describe safe credential verification without using disclosure as evidence. Each rotation plan must state how consumers adopt updates and when old authority is removed.
+Secret encoding is not encryption. Read permission, encryption at rest and application behavior protect different exposure paths, and a rotation needs the issuer, the stored value and every consumer to change in a planned order. Verification must prove that access works without printing the value.
 
 <!-- astrona:playground:destroy -->

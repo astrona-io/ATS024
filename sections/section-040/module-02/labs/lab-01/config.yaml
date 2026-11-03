@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Repair A Failed Job And A CronJob (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-040-02-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+
+# Starting state: a Job that fails on its first attempt and has no retry, and
+# a suspended CronJob that may overlap and keeps too many finished Jobs.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the failed Job and the faulty CronJob
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: scan-report-complete
+      description: The Job scan-report finished successfully
+      type: file
+      source: validation/validate-scan-report-complete.sh
+      hint: The first attempt of the task fails on purpose. The Job needs a retry that keeps the same Pod, so the marker file survives.
+    - name: scan-report-retries
+      description: scan-report retries inside the same Pod
+      type: file
+      source: validation/validate-scan-report-retries.sh
+      hint: Set restartPolicy to OnFailure and a backoffLimit of at least 1. A Job pod template cannot be edited, so delete and create the Job again.
+    - name: scan-report-cleanup
+      description: Finished scan-report Jobs are removed automatically
+      type: file
+      source: validation/validate-scan-report-cleanup.sh
+      hint: Set ttlSecondsAfterFinished in the Job spec to a value from 900 to 86400.
+    - name: scan-report-task-kept
+      description: scan-report still runs the original task
+      type: file
+      source: validation/validate-scan-report-task-kept.sh
+      hint: Keep the busybox image and the original command. Only change the fields that control retries and cleanup.
+    - name: fleet-report-no-overlap
+      description: fleet-report never overlaps with itself
+      type: file
+      source: validation/validate-fleet-report-no-overlap.sh
+      hint: Set spec.concurrencyPolicy on the CronJob to Forbid.
+    - name: fleet-report-schedulable
+      description: fleet-report is not suspended and has a start deadline
+      type: file
+      source: validation/validate-fleet-report-schedulable.sh
+      hint: Set spec.suspend to false and startingDeadlineSeconds to a value from 30 to 300.
+    - name: fleet-report-history-and-identity
+      description: fleet-report keeps a short history and is the original CronJob
+      type: file
+      source: validation/validate-fleet-report-history-and-identity.sh
+      hint: Set both history limits to 3 or less with kubectl patch. Do not delete the CronJob.
+
+teardown:
+  keepCluster: false

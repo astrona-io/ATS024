@@ -1,0 +1,78 @@
+# DaemonSet shuttle: one pod on every node, including the control-plane node.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: shuttle
+        image: docker.io/library/busybox:1.37.0
+        command: ["sh", "-c", "sleep 3600"]
+        resources:
+          requests:
+            cpu: 5m
+            memory: 8Mi
+---
+# Headless Service for the StatefulSet probe: clusterIP None gives each pod a DNS name.
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  clusterIP: None
+  selector:
+    app: probe
+  ports:
+  - name: http
+    port: 8080
+---
+# StatefulSet probe: probe-0, probe-1, probe-2, each with its own claim.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  serviceName: probe
+  replicas: 3
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+      - name: probe
+        image: docker.io/library/busybox:1.37.0
+        command: ["sh", "-c", "hostname > /data/last-owner; sleep 3600"]
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 5m
+            memory: 8Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 64Mi

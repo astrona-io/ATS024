@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Self-Healing Deployments Capstone (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-040-cap
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+
+# Starting state: scout with a wrong readiness port, a budget that blocks every
+# eviction and no spread; bridge that crash-loops for a missing file; and a
+# CronJob that allows overlap and keeps too much history. The faults stay on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the faulty workloads in starfleet
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: scout-ready
+      description: scout has three available replicas and keeps its readiness probe
+      type: file
+      source: validation/validate-scout-ready.sh
+      hint: Compare the readiness probe port with the container port. Repair the probe; do not remove it.
+    - name: scout-pdb-allows-one-eviction
+      description: The scout budget allows one eviction and still protects the application
+      type: file
+      source: validation/validate-scout-pdb-allows-one-eviction.sh
+      hint: With three replicas, minAvailable 3 leaves no room. Change the budget in place; do not delete it.
+    - name: scout-topology-spread
+      description: scout spreads its pods over nodes
+      type: file
+      source: validation/validate-scout-topology-spread.sh
+      hint: Add topologySpreadConstraints to the pod template with the hostname key, maxSkew 1 and ScheduleAnyway.
+    - name: bridge-init-container
+      description: bridge starts after an init container prepares its work directory
+      type: file
+      source: validation/validate-bridge-init-container.sh
+      hint: The bridge container needs /work/config.ready. Add an init container that creates it on the shared volume.
+    - name: sweep-concurrency-and-history
+      description: sweep forbids overlap and keeps one successful and one failed Job
+      type: file
+      source: validation/validate-sweep-concurrency-and-history.sh
+      hint: Set concurrencyPolicy and both history limits on the CronJob.
+    - name: sweep-job-ttl
+      description: Finished sweep Jobs are removed after 120 seconds
+      type: file
+      source: validation/validate-sweep-job-ttl.sh
+      hint: ttlSecondsAfterFinished belongs in the Job template of the CronJob.
+
+teardown:
+  keepCluster: false

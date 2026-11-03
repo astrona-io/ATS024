@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Enforce Rules With ValidatingAdmissionPolicy (LAB). Graded against the live cluster. UNTESTED: not yet run against a live environment.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-050-07-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+    - name: seed-fault
+      description: Create the workloads and an unbound policy
+      type: file
+      source: bootstrap/setup.sh
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: replica-limit-denies-in-starfleet
+      description: Five replicas are rejected in starfleet and accepted in outpost
+      type: file
+      source: validation/validate-replica-limit.sh
+      hint: The policy replica-limit exists but has no binding. Bind it to starfleet only, with the action Deny.
+    - name: team-label-required
+      description: Deployments without a team label are rejected in starfleet
+      type: file
+      source: validation/validate-team-label.sh
+      hint: Create a ValidatingAdmissionPolicy named require-team-label for deployments on CREATE and UPDATE, and a binding with Deny for starfleet.
+    - name: shuttle-still-updatable
+      description: The shuttle Deployment has a team label and can still be updated
+      type: file
+      source: validation/validate-shuttle.sh
+      hint: shuttle was created before the rule and has no team label. Add the label to the Deployment.
+    - name: seeded-policy-unchanged
+      description: The replica-limit policy was not edited
+      type: file
+      source: validation/validate-policy-unchanged.sh
+      hint: Fix the problem with a binding, not by changing the seeded policy.
+teardown:
+  keepCluster: false

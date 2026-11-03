@@ -1,0 +1,32 @@
+{
+  "resources": [
+    {
+      "kind": "statefulset",
+      "name": "crew",
+      "namespace": "starfleet",
+      "expected": {
+        "spec": {
+          "replicas": 4,
+          "updateStrategy": {
+            "type": "RollingUpdate",
+            "rollingUpdate": {
+              "partition": 2
+            }
+          },
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "crew",
+                  "image": "docker.io/library/busybox:1.37.0"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "behavior": [],
+  "context": "kind-astro-ats-024-lab-010-03-01"
+}

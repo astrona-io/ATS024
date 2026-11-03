@@ -28,3 +28,20 @@ ID, not display position, so a later renderer can shuffle choices safely.
 
 The banks contain answer keys and are public learning material, so this is not
 a secure examination bank. Do not treat scores as an official CKA result.
+
+## Hands-On Coverage
+
+This course has 6 ungraded module playgrounds and 10 draft independent labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static configuration, shell/Python/YAML, parser, lifecycle and offline grader checks pass. Live execution remains pending because the session cannot access Podman; installed CLI configuration validation is separately blocked by its maintenance lock.
+
+| Module | Labs in teaching order |
+| --- | --- |
+| 010/01 | Perform A Rolling Template Update |
+| 010/01 | Recover A Failed Deployment Update |
+| 020/01 | Consume A Mounted ConfigMap |
+| 020/01 | Consume A Secret Without Printing It |
+| 030/01 | Configure A Metrics-Backed Autoscaler |
+| 040/01 | Repair Readiness Without Removing It |
+| 040/01 | Repair A Liveness Probe Port |
+| 050/01 | Repair An Impossible Node Selector |
+| 050/01 | Tolerate A Dedicated Worker Taint |
+| 050/02 | Enforce Restricted Pod Admission |

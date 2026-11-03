@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Repair A Crash-Looping Deployment And A Restarting Task Pod (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-040-03-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+
+# Starting state: the Deployment `bridge` in starfleet crash-loops because
+# nothing creates /work/config.txt, and the Pod `drifter-survey` in outpost has
+# restartPolicy Always although its task finishes. Both faults stay on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the namespaces and the two faulty workloads
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: bridge-has-init-container
+      description: bridge prepares its configuration in a run-to-completion init container
+      type: file
+      source: validation/validate-bridge-has-init-container.sh
+      hint: Add an entry under spec.template.spec.initContainers that mounts the work volume and writes /work/config.txt. Do not set restartPolicy on it.
+    - name: bridge-available
+      description: bridge has all replicas ready and no container is crash-looping
+      type: file
+      source: validation/validate-bridge-available.sh
+      hint: After the template changes, wait for the rollout. Check the Pods with kubectl get pods -n starfleet.
+    - name: bridge-main-container-kept
+      description: The bridge main container still checks /work/config.txt
+      type: file
+      source: validation/validate-bridge-main-container-kept.sh
+      hint: Repair the Pod template. Do not replace the main container command with a simple sleep.
+    - name: survey-restart-policy
+      description: drifter-survey does not restart after a successful exit
+      type: file
+      source: validation/validate-survey-restart-policy.sh
+      hint: restartPolicy of a Pod cannot be changed in place. Delete the Pod and create it again with OnFailure or Never.
+    - name: survey-completed
+      description: drifter-survey ran its task and ended in phase Succeeded
+      type: file
+      source: validation/validate-survey-completed.sh
+      hint: With restartPolicy OnFailure or Never, a container that exits with code 0 leaves the Pod in phase Succeeded.
+
+teardown:
+  keepCluster: false

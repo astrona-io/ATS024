@@ -1,0 +1,59 @@
+# Configure An Application With ConfigMaps And Secrets Capstone (LAB). Graded against the live cluster.
+# UNTESTED: not yet run against a live environment.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-020-cap
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+
+# Starting state: Deployment beacon in outpost with literal settings and no
+# volume, a registry Secret of the wrong type, a ServiceAccount without a pull
+# secret and a mutable ConfigMap. The faults are left in place on purpose.
+bootstrap:
+  init:
+    - name: seed-lab
+      description: Create the outpost namespace, the configuration objects and the beacon Deployment
+      type: file
+      source: bootstrap/setup.sh
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: environment-from-objects
+      description: beacon imports beacon-settings with the prefix BEACON_ and reads DB_PASSWORD from beacon-db, with no literal values
+      type: file
+      source: validation/validate-environment.sh
+    - name: registry-credentials
+      description: registry-creds is a dockerconfigjson Secret and new Pods of the ServiceAccount beacon receive it
+      type: file
+      source: validation/validate-registry-credentials.sh
+    - name: projected-files
+      description: One projected volume at /etc/beacon holds banner.txt, secrets/db-password with mode 0400 and pod/labels
+      type: file
+      source: validation/validate-projected-files.sh
+    - name: settings-immutable
+      description: beacon-settings is immutable and keeps all four keys
+      type: file
+      source: validation/validate-settings-immutable.sh
+    - name: deployment-health
+      description: beacon is the original Deployment, has 2 available replicas and POD_NAMESPACE comes from the downward API
+      type: file
+      source: validation/validate-deployment-health.sh
+
+teardown:
+  keepCluster: false

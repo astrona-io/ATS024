@@ -1,0 +1,41 @@
+# Job bridge-report: three completions, two at a time, two retries, deleted one hour after it finishes.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bridge-report
+  namespace: starfleet
+spec:
+  completions: 3
+  parallelism: 2
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: report
+        image: docker.io/library/busybox:1.37.0
+        command: ["sh", "-c", "echo report written"]
+---
+# CronJob drifter-sweep: every two minutes, never two at once.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: drifter-sweep
+  namespace: starfleet
+spec:
+  schedule: "*/2 * * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: sweep
+            image: docker.io/library/busybox:1.37.0
+            command: ["sh", "-c", "echo sweep done"]

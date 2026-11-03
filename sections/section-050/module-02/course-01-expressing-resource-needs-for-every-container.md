@@ -15,7 +15,7 @@ The main process requests little memory, but its supporting container buffers a 
 
 ## Before you start
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+You need `kubectl` and the module playground, a kind cluster with one control plane node and one worker node. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. The commands in this chapter create their own small objects, so they work whatever the playground already contains.
 
 ## Responsible components and behavior
 
@@ -71,6 +71,88 @@ flowchart TB
 Effective scheduling demand and runtime limits are related declarations with different jobs.
 
 You can now account for the actual admitted workload and classify a resource failure. A justified size preserves application requirements rather than merely making a Pending status disappear.
+
+## Check what the scheduler counts
+
+The kube-scheduler adds up the requests of the containers in a Pod and compares the total with the allocatable resources of each node minus the requests of the Pods already there. The kubelet, the agent on the node, enforces limits at run time through the container runtime. The next steps show the sum and the failure for a Pod that is too large.
+
+<!-- astrona:playground:renew -->
+
+Save this as `pod-scout-resources.yaml`. It has a main container and a helper, each with its own request:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: scout-resources
+  namespace: starfleet
+spec:
+  containers:
+  - name: scout
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+  - name: helper
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+    resources:
+      requests:
+        cpu: 50m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
+```
+
+Apply it:
+
+```sh
+kubectl apply -f pod-scout-resources.yaml
+```
+
+Then read the Pod's quality of service class and the node allocation:
+
+```sh
+kubectl -n starfleet get pod scout-resources -o jsonpath='{.status.qosClass}{"\n"}'
+kubectl describe node -l '!node-role.kubernetes.io/control-plane' | grep -A8 "Allocated resources"
+```
+
+The class is `Burstable`: the containers have requests, and requests are lower than limits for memory and there are no CPU limits. The `Allocated resources` block counts both containers' requests, 150m of CPU and 96Mi of memory for this Pod, together with the other Pods on the worker. Save this as `pod-scout-big.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: scout-big
+  namespace: starfleet
+spec:
+  containers:
+  - name: scout
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+    resources:
+      requests:
+        cpu: "64"
+```
+
+Apply it and read the event:
+
+```sh
+kubectl apply -f pod-scout-big.yaml
+kubectl -n starfleet describe pod scout-big
+```
+
+The Pod stays `Pending` and the event says `Insufficient cpu`. The Pod uses no CPU, but the request does not fit, so the scheduler refuses every node. Delete both Pods afterwards:
+
+```sh
+kubectl -n starfleet delete pod scout-resources scout-big
+```
+
+The difference between this event and a quota rejection matters for diagnosis: here the API server accepted the Pod and the scheduler could not place it. A quota or admission rejection would stop the `kubectl apply` itself with a Forbidden error.
 
 ## Common pitfalls
 

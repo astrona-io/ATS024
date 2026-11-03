@@ -1,0 +1,455 @@
+# Final domain knowledge check across all five sections.
+schema_version: 1
+kind: question_bank
+id: ats024-final
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: domain
+  id: workloads-and-scheduling
+  title: Workloads & Scheduling
+questions:
+- id: ats024-final-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify which Deployment change starts a rollout
+  source_readings:
+  - sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
+  prompt: Which change starts a new rollout of a Deployment?
+  options:
+  - id: a
+    text: Editing a field in `.spec.template`, such as the container image.
+    explanation: Correct. The Deployment controller creates a new ReplicaSet when
+      the Pod template hash changes. Scaling only changes the replica count, and an
+      external ConfigMap or a read command does not change the template.
+  - id: b
+    text: Running `kubectl scale` to change `.spec.replicas`.
+    explanation: Incorrect. The Deployment controller creates a new ReplicaSet when
+      the Pod template hash changes. Scaling only changes the replica count, and an
+      external ConfigMap or a read command does not change the template.
+  - id: c
+    text: Editing an unrelated ConfigMap that the Pods read.
+    explanation: Incorrect. The Deployment controller creates a new ReplicaSet when
+      the Pod template hash changes. Scaling only changes the replica count, and an
+      external ConfigMap or a read command does not change the template.
+  - id: d
+    text: Running `kubectl get deployment`.
+    explanation: Incorrect. The Deployment controller creates a new ReplicaSet when
+      the Pod template hash changes. Scaling only changes the replica count, and an
+      external ConfigMap or a read command does not change the template.
+  correct_option: a
+  explanation: The Deployment controller creates a new ReplicaSet when the Pod template
+    hash changes. Scaling only changes the replica count, and an external ConfigMap
+    or a read command does not change the template.
+- id: ats024-final-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate rolling-update limits
+  source_readings:
+  - sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
+  prompt: 'A Deployment has 10 replicas with `maxSurge: 25%` and `maxUnavailable:
+    25%`. What are the effective limits during a rolling update?'
+  options:
+  - id: a
+    text: Up to 12 Pods in total and at least 7 available.
+    explanation: Incorrect. `maxSurge` rounds up (2.5 becomes 3), so up to 13 Pods
+      can exist. `maxUnavailable` rounds down (2.5 becomes 2), so at least 8 must
+      stay available.
+  - id: b
+    text: Up to 13 Pods in total and at least 8 available.
+    explanation: Correct. `maxSurge` rounds up (2.5 becomes 3), so up to 13 Pods can
+      exist. `maxUnavailable` rounds down (2.5 becomes 2), so at least 8 must stay
+      available.
+  - id: c
+    text: Up to 12 Pods in total and at least 8 available.
+    explanation: Incorrect. `maxSurge` rounds up (2.5 becomes 3), so up to 13 Pods
+      can exist. `maxUnavailable` rounds down (2.5 becomes 2), so at least 8 must
+      stay available.
+  - id: d
+    text: Up to 13 Pods in total and at least 7 available.
+    explanation: Incorrect. `maxSurge` rounds up (2.5 becomes 3), so up to 13 Pods
+      can exist. `maxUnavailable` rounds down (2.5 becomes 2), so at least 8 must
+      stay available.
+  correct_option: b
+  explanation: "`maxSurge` rounds up (2.5 becomes 3), so up to 13 Pods can exist.
+    `maxUnavailable` rounds down (2.5 becomes 2), so at least 8 must stay available."
+- id: ats024-final-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose between ConfigMap and Secret and the delivery method
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: A container must read a non-confidential settings file that changes without
+    restarting the Pod. Which delivery fits best?
+  options:
+  - id: a
+    text: A ConfigMap mounted with `subPath`.
+    explanation: Incorrect. The kubelet refreshes ConfigMap volumes after the object
+      changes. Environment variables and `subPath` mounts are not updated in a running
+      container.
+  - id: b
+    text: A Secret injected as an environment variable.
+    explanation: Incorrect. The kubelet refreshes ConfigMap volumes after the object
+      changes. Environment variables and `subPath` mounts are not updated in a running
+      container.
+  - id: c
+    text: A ConfigMap mounted as a volume without `subPath`.
+    explanation: Correct. The kubelet refreshes ConfigMap volumes after the object
+      changes. Environment variables and `subPath` mounts are not updated in a running
+      container.
+  - id: d
+    text: A ConfigMap injected as an environment variable.
+    explanation: Incorrect. The kubelet refreshes ConfigMap volumes after the object
+      changes. Environment variables and `subPath` mounts are not updated in a running
+      container.
+  correct_option: c
+  explanation: The kubelet refreshes ConfigMap volumes after the object changes. Environment
+    variables and `subPath` mounts are not updated in a running container.
+- id: ats024-final-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what Secret encoding protects
+  source_readings:
+  - sections/section-020/module-01/course-02-secret-storage-delivery-and-rotation.md
+  prompt: What does the base64 encoding in a Secret's `data` field provide?
+  options:
+  - id: a
+    text: Encryption at rest in etcd.
+    explanation: Incorrect. Base64 is an encoding. Confidentiality comes from RBAC,
+      and encryption at rest needs an `EncryptionConfiguration` on the API server.
+  - id: b
+    text: Protection from users who can read the Secret through the API.
+    explanation: Incorrect. Base64 is an encoding. Confidentiality comes from RBAC,
+      and encryption at rest needs an `EncryptionConfiguration` on the API server.
+  - id: c
+    text: Automatic rotation of the value.
+    explanation: Incorrect. Base64 is an encoding. Confidentiality comes from RBAC,
+      and encryption at rest needs an `EncryptionConfiguration` on the API server.
+  - id: d
+    text: Only a text-safe representation of binary data, not confidentiality.
+    explanation: Correct. Base64 is an encoding. Confidentiality comes from RBAC,
+      and encryption at rest needs an `EncryptionConfiguration` on the API server.
+  correct_option: d
+  explanation: Base64 is an encoding. Confidentiality comes from RBAC, and encryption
+    at rest needs an `EncryptionConfiguration` on the API server.
+- id: ats024-final-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the HorizontalPodAutoscaler utilization calculation
+  source_readings:
+  - sections/section-030/module-01/course-01-metric-driven-replica-decisions-and-their-boundaries.md
+  prompt: A `HorizontalPodAutoscaler` targets 50 percent CPU utilization. The Pods
+    use 100 percent of their CPU requests on average and there are 4 replicas. What
+    desired replica count does the controller compute?
+  options:
+  - id: a
+    text: '8'
+    explanation: Correct. The formula is ceil(currentReplicas x currentMetric / targetMetric)
+      = ceil(4 x 100 / 50) = 8, limited by `minReplicas` and `maxReplicas`.
+  - id: b
+    text: '4'
+    explanation: Incorrect. The formula is ceil(currentReplicas x currentMetric /
+      targetMetric) = ceil(4 x 100 / 50) = 8, limited by `minReplicas` and `maxReplicas`.
+  - id: c
+    text: '2'
+    explanation: Incorrect. The formula is ceil(currentReplicas x currentMetric /
+      targetMetric) = ceil(4 x 100 / 50) = 8, limited by `minReplicas` and `maxReplicas`.
+  - id: d
+    text: '6'
+    explanation: Incorrect. The formula is ceil(currentReplicas x currentMetric /
+      targetMetric) = ceil(4 x 100 / 50) = 8, limited by `minReplicas` and `maxReplicas`.
+  correct_option: a
+  explanation: The formula is ceil(currentReplicas x currentMetric / targetMetric)
+    = ceil(4 x 100 / 50) = 8, limited by `minReplicas` and `maxReplicas`.
+- id: ats024-final-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Diagnose why a resource-metric autoscaler cannot compute utilization
+  source_readings:
+  - sections/section-030/module-01/course-01-metric-driven-replica-decisions-and-their-boundaries.md
+  prompt: A `HorizontalPodAutoscaler` on CPU utilization shows `<unknown>` for the
+    current value while metrics-server works. What is a likely cause?
+  options:
+  - id: a
+    text: The cluster has no taints.
+    explanation: Incorrect. Utilization is a percentage of the request, so a container
+      without a CPU request has no denominator.
+  - id: b
+    text: The Pods do not declare a CPU request.
+    explanation: Correct. Utilization is a percentage of the request, so a container
+      without a CPU request has no denominator.
+  - id: c
+    text: The Deployment has too few replicas.
+    explanation: Incorrect. Utilization is a percentage of the request, so a container
+      without a CPU request has no denominator.
+  - id: d
+    text: The Pods use a ConfigMap.
+    explanation: Incorrect. Utilization is a percentage of the request, so a container
+      without a CPU request has no denominator.
+  correct_option: b
+  explanation: Utilization is a percentage of the request, so a container without
+    a CPU request has no denominator.
+- id: ats024-final-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Describe reconciliation
+  source_readings:
+  - sections/section-040/module-01/course-01-desired-state-and-reconciliation.md
+  prompt: Which component recreates a Pod that a ReplicaSet owns after a node removes
+    it?
+  options:
+  - id: a
+    text: The scheduler alone.
+    explanation: Incorrect. The ReplicaSet controller compares the desired replica
+      count with the observed Pods and creates a replacement. The scheduler then places
+      it.
+  - id: b
+    text: The kube-proxy.
+    explanation: Incorrect. The ReplicaSet controller compares the desired replica
+      count with the observed Pods and creates a replacement. The scheduler then places
+      it.
+  - id: c
+    text: The ReplicaSet controller in the controller manager.
+    explanation: Correct. The ReplicaSet controller compares the desired replica count
+      with the observed Pods and creates a replacement. The scheduler then places
+      it.
+  - id: d
+    text: The kubelet on a different node.
+    explanation: Incorrect. The ReplicaSet controller compares the desired replica
+      count with the observed Pods and creates a replacement. The scheduler then places
+      it.
+  correct_option: c
+  explanation: The ReplicaSet controller compares the desired replica count with the
+    observed Pods and creates a replacement. The scheduler then places it.
+- id: ats024-final-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish readiness, liveness and startup probes
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: A slow application needs 90 seconds to start and is restarted by its liveness
+    probe before it is ready. Which change fixes this without weakening liveness afterwards?
+  options:
+  - id: a
+    text: Remove the readiness probe.
+    explanation: Incorrect. While a startup probe has not succeeded, the kubelet does
+      not run liveness or readiness probes, so the slow start is not treated as a
+      failure.
+  - id: b
+    text: 'Set `restartPolicy: Never`.'
+    explanation: Incorrect. While a startup probe has not succeeded, the kubelet does
+      not run liveness or readiness probes, so the slow start is not treated as a
+      failure.
+  - id: c
+    text: Increase `maxSurge`.
+    explanation: Incorrect. While a startup probe has not succeeded, the kubelet does
+      not run liveness or readiness probes, so the slow start is not treated as a
+      failure.
+  - id: d
+    text: Add a `startupProbe` with enough `failureThreshold` x `periodSeconds`.
+    explanation: Correct. While a startup probe has not succeeded, the kubelet does
+      not run liveness or readiness probes, so the slow start is not treated as a
+      failure.
+  correct_option: d
+  explanation: While a startup probe has not succeeded, the kubelet does not run liveness
+    or readiness probes, so the slow start is not treated as a failure.
+- id: ats024-final-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain readiness effects on Services
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: A Pod fails its readiness probe. What happens?
+  options:
+  - id: a
+    text: The Pod is removed from the Service endpoints but is not restarted.
+    explanation: Correct. Readiness controls endpoint eligibility. Only a failing
+      liveness probe makes the kubelet restart the container.
+  - id: b
+    text: The kubelet restarts the container.
+    explanation: Incorrect. Readiness controls endpoint eligibility. Only a failing
+      liveness probe makes the kubelet restart the container.
+  - id: c
+    text: The Pod is deleted by the scheduler.
+    explanation: Incorrect. Readiness controls endpoint eligibility. Only a failing
+      liveness probe makes the kubelet restart the container.
+  - id: d
+    text: The Pod moves to another node.
+    explanation: Incorrect. Readiness controls endpoint eligibility. Only a failing
+      liveness probe makes the kubelet restart the container.
+  correct_option: a
+  explanation: Readiness controls endpoint eligibility. Only a failing liveness probe
+    makes the kubelet restart the container.
+- id: ats024-final-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Separate filtering from scoring
+  source_readings:
+  - sections/section-050/module-01/course-01-filtering-scoring-and-placement-rules.md
+  prompt: A Pod has a `requiredDuringSchedulingIgnoredDuringExecution` node affinity
+    for `disk=ssd`. No node has that label. What happens?
+  options:
+  - id: a
+    text: The Pod runs on the control plane.
+    explanation: Incorrect. Required rules are filters. If no node passes, the Pod
+      is unschedulable.
+  - id: b
+    text: The Pod stays Pending with a FailedScheduling event.
+    explanation: Correct. Required rules are filters. If no node passes, the Pod is
+      unschedulable.
+  - id: c
+    text: The scheduler places it on the highest scoring node anyway.
+    explanation: Incorrect. Required rules are filters. If no node passes, the Pod
+      is unschedulable.
+  - id: d
+    text: The kubelet adds the label.
+    explanation: Incorrect. Required rules are filters. If no node passes, the Pod
+      is unschedulable.
+  correct_option: b
+  explanation: Required rules are filters. If no node passes, the Pod is unschedulable.
+- id: ats024-final-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret taint effects
+  source_readings:
+  - sections/section-050/module-01/course-02-taints-tolerations-and-eligibility.md
+  prompt: A node has the taint `dedicated=gpu:NoSchedule`. A running Pod has no toleration.
+    What happens to that Pod?
+  options:
+  - id: a
+    text: It is restarted on the same node.
+    explanation: Incorrect. `NoSchedule` blocks new Pods. Only `NoExecute` evicts
+      running Pods.
+  - id: b
+    text: It is rescheduled by the scheduler.
+    explanation: Incorrect. `NoSchedule` blocks new Pods. Only `NoExecute` evicts
+      running Pods.
+  - id: c
+    text: It keeps running, because `NoSchedule` affects only new scheduling.
+    explanation: Correct. `NoSchedule` blocks new Pods. Only `NoExecute` evicts running
+      Pods.
+  - id: d
+    text: The kubelet evicts it immediately.
+    explanation: Incorrect. `NoSchedule` blocks new Pods. Only `NoExecute` evicts
+      running Pods.
+  correct_option: c
+  explanation: "`NoSchedule` blocks new Pods. Only `NoExecute` evicts running Pods."
+- id: ats024-final-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what a toleration does
+  source_readings:
+  - sections/section-050/module-01/course-02-taints-tolerations-and-eligibility.md
+  prompt: What does a toleration alone guarantee?
+  options:
+  - id: a
+    text: That the Pod will only run on the tainted node.
+    explanation: Incorrect. Tolerations permit. Use node affinity or a selector to
+      attract the Pod to the tainted nodes.
+  - id: b
+    text: That the taint is removed.
+    explanation: Incorrect. Tolerations permit. Use node affinity or a selector to
+      attract the Pod to the tainted nodes.
+  - id: c
+    text: That the node has enough resources.
+    explanation: Incorrect. Tolerations permit. Use node affinity or a selector to
+      attract the Pod to the tainted nodes.
+  - id: d
+    text: That the Pod may be scheduled on a matching tainted node, not that it will
+      be.
+    explanation: Correct. Tolerations permit. Use node affinity or a selector to attract
+      the Pod to the tainted nodes.
+  correct_option: d
+  explanation: Tolerations permit. Use node affinity or a selector to attract the
+    Pod to the tainted nodes.
+- id: ats024-final-q13
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain requests and limits
+  source_readings:
+  - sections/section-050/module-02/course-01-expressing-resource-needs-for-every-container.md
+  prompt: Which statement about requests and limits is correct?
+  options:
+  - id: a
+    text: The scheduler uses requests to choose a node, and the kubelet enforces limits
+      at run time.
+    explanation: 'Correct. Scheduling uses the sum of requests. The container runtime
+      enforces limits through cgroups: CPU is throttled and memory above the limit
+      is OOM-killed.'
+  - id: b
+    text: The scheduler uses limits to choose a node.
+    explanation: 'Incorrect. Scheduling uses the sum of requests. The container runtime
+      enforces limits through cgroups: CPU is throttled and memory above the limit
+      is OOM-killed.'
+  - id: c
+    text: Limits reserve capacity on the node.
+    explanation: 'Incorrect. Scheduling uses the sum of requests. The container runtime
+      enforces limits through cgroups: CPU is throttled and memory above the limit
+      is OOM-killed.'
+  - id: d
+    text: Requests cap memory use.
+    explanation: 'Incorrect. Scheduling uses the sum of requests. The container runtime
+      enforces limits through cgroups: CPU is throttled and memory above the limit
+      is OOM-killed.'
+  correct_option: a
+  explanation: 'Scheduling uses the sum of requests. The container runtime enforces
+    limits through cgroups: CPU is throttled and memory above the limit is OOM-killed.'
+- id: ats024-final-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Apply Pod Security Admission
+  source_readings:
+  - sections/section-050/module-02/course-02-applying-pod-security-requirements-at-admission.md
+  prompt: 'A namespace has the label `pod-security.kubernetes.io/enforce: restricted`.
+    A Pod requests `privileged: true`. What happens?'
+  options:
+  - id: a
+    text: The Pod is created and then deleted.
+    explanation: Incorrect. The Pod Security admission controller runs inside the
+      API server and rejects violating Pods before they are stored.
+  - id: b
+    text: The API server rejects the Pod at admission.
+    explanation: Correct. The Pod Security admission controller runs inside the API
+      server and rejects violating Pods before they are stored.
+  - id: c
+    text: The scheduler skips the Pod.
+    explanation: Incorrect. The Pod Security admission controller runs inside the
+      API server and rejects violating Pods before they are stored.
+  - id: d
+    text: The kubelet starts it with a warning.
+    explanation: Incorrect. The Pod Security admission controller runs inside the
+      API server and rejects violating Pods before they are stored.
+  correct_option: b
+  explanation: The Pod Security admission controller runs inside the API server and
+    rejects violating Pods before they are stored.
+- id: ats024-final-q15
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Recover a failed rollout
+  source_readings:
+  - sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
+  prompt: A rollout stops because the new Pods never become ready. Which command returns
+    the Deployment to its previous template?
+  options:
+  - id: a
+    text: "`kubectl rollout status deployment/probe`"
+    explanation: Incorrect. `rollout undo` restores the template of the previous revision.
+      Pause and status do not change the template.
+  - id: b
+    text: "`kubectl scale deployment/probe --replicas=0`"
+    explanation: Incorrect. `rollout undo` restores the template of the previous revision.
+      Pause and status do not change the template.
+  - id: c
+    text: "`kubectl rollout undo deployment/probe`"
+    explanation: Correct. `rollout undo` restores the template of the previous revision.
+      Pause and status do not change the template.
+  - id: d
+    text: "`kubectl rollout pause deployment/probe`"
+    explanation: Incorrect. `rollout undo` restores the template of the previous revision.
+      Pause and status do not change the template.
+  correct_option: c
+  explanation: "`rollout undo` restores the template of the previous revision. Pause
+    and status do not change the template."

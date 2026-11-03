@@ -15,7 +15,7 @@ The `probe` process can remain running while readiness removes it from Service t
 
 ## Before you start
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. The module playground runs the `probe` Deployment in `starfleet`. Its application serves `/ready` and `/health` on port 8080, so you can run the commands in this chapter against it.
 
 ## Responsible components and behavior
 
@@ -44,6 +44,37 @@ A gRPC probe checks the supported gRPC health protocol, where configured and ava
 A rough startup allowance can be reasoned about from the startup period and failure threshold, but scheduling and exact check timing should not be treated as an ideal stopwatch. The useful design question is whether realistic initialization fits the configured allowance without delaying failure detection excessively.
 
 A timeout shorter than normal response latency creates false failures. A check that performs expensive dependency work at a high frequency can itself increase load. Health endpoints should be cheap enough for their frequency while meaningful enough to support the action they control.
+
+## How The Kubelet Runs A Probe
+
+Each probe is a small loop that the kubelet runs for one container. Every `periodSeconds` the kubelet performs the check. It counts consecutive results: after `failureThreshold` failures in a row the probe's state changes to failed, and after `successThreshold` successes in a row it changes back to succeeded. For readiness the state sets the `Ready` condition of the Pod. For liveness a failed state makes the kubelet kill the container and apply the Pod's `restartPolicy`. For a startup probe a failed state also kills the container, and a succeeded state switches on the other two probes.
+
+For an HTTP probe, any status code from 200 up to but not including 400 counts as success. The `probe` application returns 503 from `/ready` when the file `/tmp/not-ready` exists, and from `/health` when `/tmp/unhealthy` exists. That gives a safe way to produce each failure on demand.
+
+## Observe A Probe Failure
+
+The playground `probe` Deployment has only a readiness probe, and it points at port 9090 where nothing listens. Look at the kubelet's verdict in the Pod events and in the container status.
+
+<!-- astrona:playground:renew -->
+
+```sh
+kubectl -n starfleet describe pods -l app=probe
+```
+
+In the Events section you find lines with the reason `Unhealthy` and a message that the readiness probe failed with a connection refused error on port 9090. The `Conditions` block shows `Ready` as `False`, while `ContainersReady` is also `False` and `Initialized` and `PodScheduled` are `True`. The container state stays `Running` and the restart count stays at 0. This is the readiness-only behavior: the kubelet reports the failure and takes no restart action.
+
+Now read the probe settings as the API server stores them and compare them with the application's real port.
+
+```sh
+kubectl -n starfleet get deployment probe -o jsonpath='{.spec.template.spec.containers[0].readinessProbe}{"\n"}'
+kubectl -n starfleet get endpointslices -l kubernetes.io/service-name=probe
+```
+
+The first command prints the probe as JSON, with the port 9090. The second lists the EndpointSlice of the `probe` Service. Its endpoints exist but carry `ready: false` in their conditions, so the Service sends no traffic to them. That is the effect of the probe, shown in the object that the proxy components read.
+
+## Choose Thresholds From A Budget
+
+A useful way to size a startup probe is to multiply its `periodSeconds` by its `failureThreshold`. A startup probe with a period of 5 seconds and a threshold of 30 gives the container about 150 seconds to start before the kubelet kills it. A liveness probe with a period of 10 and a threshold of 3 detects a hung process in about 30 seconds. Because startup suppresses liveness, you can keep the liveness settings strict and give the slow start its own generous allowance. Raising `initialDelaySeconds` on liveness instead delays failure detection for the whole life of the container, not only at start.
 
 ## Diagnose A Restart Or Missing Endpoint
 

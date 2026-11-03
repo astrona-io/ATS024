@@ -1,0 +1,31 @@
+# scout: two init containers run in order, one after the other, before the
+# main container starts. They share an emptyDir volume with it.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  initContainers:
+    - name: write-config
+      image: docker.io/library/busybox:1.37.0
+      command: ["sh", "-c", "echo mode=survey > /work/config.txt"]
+      volumeMounts:
+        - name: work
+          mountPath: /work
+    - name: check-config
+      image: docker.io/library/busybox:1.37.0
+      command: ["sh", "-c", "test -s /work/config.txt"]
+      volumeMounts:
+        - name: work
+          mountPath: /work
+  containers:
+    - name: scout
+      image: docker.io/library/busybox:1.37.0
+      command: ["sh", "-c", "cat /work/config.txt; while true; do sleep 5; done"]
+      volumeMounts:
+        - name: work
+          mountPath: /work
+  volumes:
+    - name: work
+      emptyDir: {}

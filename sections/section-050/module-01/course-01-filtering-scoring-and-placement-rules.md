@@ -15,7 +15,7 @@ A Pod needs an accelerator, but the only idle node lacks its required label. Fre
 
 ## Before you start
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+You need `kubectl` and the module playground, a kind cluster with one control plane node and one worker node. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. The commands in this chapter create their own small objects, so they work whatever the playground already contains.
 
 ## Responsible components and behavior
 
@@ -68,7 +68,78 @@ flowchart TB
 
 A placement fix must preserve the requirement that made a node suitable, rather than merely produce an assignment.
 
-A placement fix must preserve the requirement that made a node suitable, rather than merely produce an assignment.
+## Watch the filter phase work
+
+The scheduler is the control plane component that assigns every new Pod to a node. It runs two phases for each Pod: filter, which removes nodes that fail a hard requirement, and score, which ranks the nodes that remain. The scheduler writes its decision into the Pod and, when no node passes the filter phase, writes a `FailedScheduling` event instead. You can see both outcomes with two small Pods.
+
+<!-- astrona:playground:renew -->
+
+Save this as `pod-filter-fail.yaml`. It requires a node label that no node has:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: filter-fail
+  namespace: starfleet
+spec:
+  nodeSelector:
+    training.astrona.io/accelerator: "true"
+  containers:
+  - name: scout
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+```
+
+Apply it:
+
+```sh
+kubectl apply -f pod-filter-fail.yaml
+```
+
+Then read the events:
+
+```sh
+kubectl -n starfleet describe pod filter-fail
+```
+
+The Pod is `Pending`. The event is a `FailedScheduling` warning from `default-scheduler`. It says that no node is available and counts the nodes that did not match the Pod's node affinity or selector. The scheduler did not fail: it tested every node, found none that satisfies the mandatory rule, and left the Pod unassigned. Free CPU on the worker does not matter, because the filter runs before any resource preference.
+
+A rule that a node satisfies produces a different result. Save this as `pod-filter-pass.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: filter-pass
+  namespace: starfleet
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+  - name: scout
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+```
+
+Apply it and check the node:
+
+```sh
+kubectl apply -f pod-filter-pass.yaml
+kubectl -n starfleet get pod filter-pass -o wide
+```
+
+The Pod runs on the worker. Both nodes carry the label `kubernetes.io/os=linux`, so both pass this rule, but the control plane node fails a different filter: its taint. The scheduler therefore left one candidate and chose it. Delete both Pods when you are done:
+
+```sh
+kubectl -n starfleet delete pod filter-fail filter-pass
+```
+
+### What the exam expects
+
+The exam gives a Pod that does not start and asks you to find the rule that excludes every node. Read the event first, compare it with the node labels and taints, and change the Pod only if the rule is wrong. Never relabel a node to make a mistaken rule pass unless the label is the real fault.
+
+The two Pods show the filter phase from the outside. What they cannot show is scoring, because a single candidate has nothing to rank against. Scoring matters once several nodes pass, and the preferred rules of the next topics feed it.
 
 ## Common pitfalls
 

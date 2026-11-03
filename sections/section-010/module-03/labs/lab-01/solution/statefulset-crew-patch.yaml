@@ -1,0 +1,10 @@
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 2
+  template:
+    spec:
+      containers:
+      - name: crew
+        image: docker.io/library/busybox:1.37.0

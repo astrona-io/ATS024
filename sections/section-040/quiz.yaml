@@ -1,0 +1,398 @@
+# Knowledge check for section 040. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+---
+schema_version: 1
+kind: question_bank
+id: ats024-040
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: section
+  id: section-040
+  title: Understand the primitives used to create robust, self-healing, application
+    deployments
+questions:
+- id: ats024-040-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain owner-driven replacement and desired state
+  source_readings:
+  - sections/section-040/module-01/course-01-desired-state-and-reconciliation.md
+  prompt: An administrator deletes one of the three `probe` Pods in `starfleet`. A
+    few seconds later three Pods exist again, and one has a new name. Which component
+    created the new Pod?
+  options:
+  - id: a
+    text: The kubelet on the node that ran the deleted Pod.
+    explanation: The kubelet runs Pods that are assigned to its node. It does not
+      create Pod objects to match a replica count.
+  - id: b
+    text: The scheduler, because it keeps the number of Pods equal to the Deployment
+      replicas.
+    explanation: The scheduler only chooses a node for a Pod that has none. It never
+      creates Pods.
+  - id: c
+    text: The ReplicaSet controller in kube-controller-manager, which saw fewer owned
+      Pods than the ReplicaSet asks for.
+    explanation: Correct. The Deployment owns a ReplicaSet and the ReplicaSet owns
+      the Pods. The ReplicaSet controller compares the desired count with the owned
+      Pods and creates a new Pod from its template.
+  - id: d
+    text: The API server, which restores deleted objects from its stored copy.
+    explanation: The API server stores and serves objects. It does not recreate an
+      object that was deleted.
+  correct_option: c
+  explanation: The ReplicaSet controller compares the desired replica count with the
+    Pods it owns and creates a new Pod from its template.
+- id: ats024-040-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose health checks with appropriate recovery actions
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  prompt: The `scout` Pods depend on a shared database. When the database is down
+    for a minute, the team wants `scout` to stop receiving Service traffic. They do
+    not want the containers restarted, because a restart does not repair the database.
+    Which probe should check the database?
+  options:
+  - id: a
+    text: A liveness probe, so the kubelet restarts the container until the database
+      returns.
+    explanation: A failed liveness probe makes the kubelet restart the container,
+      which is the behavior the team wants to avoid.
+  - id: b
+    text: A startup probe with a very large `failureThreshold`.
+    explanation: A startup probe only gates the other probes at start. A failed startup
+      probe also leads to a restart.
+  - id: c
+    text: No probe, because the Deployment controller removes Pods that cannot reach
+      the database.
+    explanation: The Deployment controller does not know about the database. It only
+      counts Pods.
+  - id: d
+    text: A readiness probe, so the Pod becomes not ready and leaves the Service endpoints
+      without a restart.
+    explanation: Correct. A failed readiness probe sets the Ready condition to False,
+      and the Pod is removed from the ready endpoints. The container keeps running.
+  correct_option: d
+  explanation: Readiness controls traffic eligibility and does not restart the container.
+- id: ats024-040-q03
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Distinguish process startup from useful service and diagnose
+    probe failures
+  source_readings:
+  - sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
+  - sections/section-040/module-01/course-01-desired-state-and-reconciliation.md
+  prompt: The `probe` Deployment shows `0/2` ready. `kubectl describe pods` shows
+    the containers in state `Running` with 0 restarts and repeated `Unhealthy` events
+    about the readiness probe on port 9090. The container listens on port 8080. What
+    is the correct repair?
+  options:
+  - id: a
+    text: Delete the readiness probe so the Pods become ready.
+    explanation: This hides the fault. The Pods would receive traffic without proof
+      that they can serve it.
+  - id: b
+    text: Delete the ReplicaSet so the controller creates new Pods.
+    explanation: New Pods use the same template with the same wrong port. They fail
+      the same way.
+  - id: c
+    text: Change the readiness probe port in the Deployment pod template to the named
+      port `http` and wait for the rollout.
+    explanation: Correct. The probe must check the port where the application listens.
+      A template change makes the Deployment controller create new Pods that pass
+      the check.
+  - id: d
+    text: Increase `failureThreshold` until the probe passes.
+    explanation: A probe that checks a closed port never succeeds, however many failures
+      it tolerates.
+  correct_option: c
+  explanation: Repair the probe port in the template. Removing the probe or deleting
+    Pods keeps the fault or hides it.
+- id: ats024-040-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain how a ReplicaSet owns its Pods and what the garbage
+    collector does when an owner is deleted
+  source_readings:
+  - sections/section-040/module-02/course-01-replicaset-ownership-and-garbage-collection.md
+  prompt: An administrator runs `kubectl -n starfleet delete replicaset -l app=scout
+    --cascade=orphan` for the ReplicaSet of the Deployment `scout`. What happens to
+    the three `scout` Pods?
+  options:
+  - id: a
+    text: The garbage collector deletes all three Pods, because their owner is gone.
+    explanation: That is the default cascading deletion. With --cascade=orphan the
+      garbage collector removes the owner reference instead of deleting the Pods.
+  - id: b
+    text: The Pods keep running and lose their owner reference, and the Deployment
+      creates a new ReplicaSet that can adopt them.
+    explanation: Correct. Orphaning removes the owner reference from the dependents.
+      The Deployment controller then creates a ReplicaSet for the current template,
+      and its selector matches Pods that have no controller owner.
+  - id: c
+    text: The delete is refused until the Pods are deleted first.
+    explanation: Only foreground deletion waits for dependents. Orphan deletion does
+      not.
+  - id: d
+    text: The Pods are restarted one by one by the Deployment.
+    explanation: Deleting a ReplicaSet does not restart Pods. Restarts and replacements
+      happen only through template changes or Pod deletion.
+  correct_option: b
+  explanation: Orphan deletion removes the owner reference and leaves the Pods running,
+    and the Deployment controller creates a new ReplicaSet that adopts matching Pods
+    without a controller owner.
+- id: ats024-040-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose between a Deployment, a DaemonSet and a StatefulSet and
+    explain the supporting objects each needs
+  source_readings:
+  - sections/section-040/module-02/course-02-daemonset-and-statefulset.md
+  prompt: A three-replica StatefulSet `probe` runs in `starfleet`. All three Pods
+    are Running, but the command `nslookup probe-1.probe` from `probe-0` fails to
+    resolve. Which cause fits?
+  options:
+  - id: a
+    text: 'The StatefulSet must use `podManagementPolicy: Parallel` for DNS names
+      to exist.'
+    explanation: The management policy only controls start and stop order. It has
+      no effect on DNS names.
+  - id: b
+    text: The PersistentVolumeClaim `data-probe-1` is missing.
+    explanation: A missing claim keeps the Pod Pending. The Pod here is Running.
+  - id: c
+    text: The Pods need a ClusterIP Service with a load-balancing virtual IP address.
+    explanation: A normal ClusterIP Service gives one name for all Pods. Per-Pod names
+      need a headless Service.
+  - id: d
+    text: The headless Service named in `serviceName` is missing, or its selector
+      does not match the Pods.
+    explanation: 'Correct. Per-Pod DNS names in the form pod.service need a headless
+      Service (`clusterIP: None`) that matches the Pods and is named by `serviceName`.
+      The StatefulSet does not create it.'
+  correct_option: d
+  explanation: The StatefulSet does not create its headless Service, and without a
+    matching one the per-Pod DNS names do not resolve even though the Pods run.
+- id: ats024-040-q06
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Configure a CronJob concurrency policy and a Job retry policy
+    for a task that must not overlap and must retry
+  source_readings:
+  - sections/section-040/module-02/course-03-jobs-and-cronjobs.md
+  prompt: The CronJob `fleet-report` runs every minute, but one run can take three
+    minutes and writes a single output file. Two runs sometimes write at once. A failed
+    attempt must be retried without losing a scratch file in an `emptyDir`. Which
+    settings meet both needs?
+  options:
+  - id: a
+    text: "`concurrencyPolicy: Forbid` in the CronJob and `restartPolicy: OnFailure`
+      in the Job template."
+    explanation: Correct. Forbid skips a new run while the previous Job is active.
+      OnFailure restarts the container in the same Pod, so the emptyDir survives the
+      retry.
+  - id: b
+    text: "`concurrencyPolicy: Replace` and `restartPolicy: Never`."
+    explanation: Replace deletes the running Job and starts another, so a long run
+      never finishes. Never creates a new Pod for a retry, and its emptyDir is empty.
+  - id: c
+    text: "`concurrencyPolicy: Allow` and `backoffLimit: 0`."
+    explanation: Allow is the cause of the overlap, and a limit of 0 gives no retry.
+  - id: d
+    text: "`suspend: true` and `restartPolicy: Always`."
+    explanation: Suspend stops all new runs, and Always is not allowed in a Job template.
+  correct_option: a
+  explanation: Forbid prevents overlapping runs, and OnFailure retries inside the
+    same Pod so the emptyDir keeps its files.
+- id: ats024-040-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose the restartPolicy that fits a one-time task
+  source_readings:
+  - sections/section-040/module-03/course-01-restart-policy-and-crash-loops.md
+  prompt: 'A bare Pod `drifter-survey` runs a command that prints a result and exits
+    with code 0. With `restartPolicy: Always`, its status keeps changing between `Completed`
+    and `CrashLoopBackOff` and `RESTARTS` grows. What is the correct fix?'
+  options:
+  - id: a
+    text: Add a livenessProbe, so that the kubelet stops restarting the container.
+    explanation: A liveness probe can only cause more restarts. It does not change
+      what happens after an exit.
+  - id: b
+    text: 'Edit the Pod in place and set `restartPolicy: Never`.'
+    explanation: The restartPolicy of a Pod cannot be changed on an existing Pod.
+  - id: c
+    text: 'Create the Pod again with `restartPolicy: OnFailure` or `Never`, so that
+      an exit with code 0 ends in the phase `Succeeded`.'
+    explanation: Correct. With `Always` the kubelet restarts the container after every
+      exit, also after success. `OnFailure` restarts only after a non-zero exit, and
+      `Never` does not restart.
+  - id: d
+    text: Raise `terminationGracePeriodSeconds` so that the container has more time
+      to finish.
+    explanation: The grace period applies to a stop that is requested by a delete.
+      It does not change the restart decision.
+  correct_option: c
+  explanation: With `Always` the kubelet restarts the container after every exit,
+    also after success. `OnFailure` or `Never` fits a task, and a Pod needs to be
+    created again to change it.
+- id: ats024-040-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Use a startup probe so that a liveness probe does not kill a
+    slow application
+  source_readings:
+  - sections/section-040/module-03/course-01-restart-policy-and-crash-loops.md
+  prompt: 'The `bridge` container needs about 40 seconds to start. Its liveness probe
+    has `periodSeconds: 5` and `failureThreshold: 1`, and the container restarts every
+    5 to 10 seconds. The team must keep the fast liveness check after startup. Which
+    change fixes it?'
+  options:
+  - id: a
+    text: 'Add a `startupProbe` with `periodSeconds: 5` and `failureThreshold: 12`,
+      so that the liveness probe starts only after the startup probe succeeds.'
+    explanation: Correct. The kubelet does not run liveness and readiness probes until
+      the startup probe has succeeded. It allows up to 60 seconds here.
+  - id: b
+    text: Replace the liveness probe with a readiness probe.
+    explanation: A readiness probe does not restart the container, but the task requires
+      the liveness check to stay.
+  - id: c
+    text: 'Set `restartPolicy: Never` on the Pod.'
+    explanation: The Deployment accepts only `Always`, and the container would not
+      recover after a real failure.
+  - id: d
+    text: Increase `terminationGracePeriodSeconds` to 60.
+    explanation: The grace period governs stopping, not the delay of the liveness
+      probe.
+  correct_option: a
+  explanation: A startup probe holds back the liveness and readiness probes until
+    it succeeds once, so a slow start is not treated as a failure.
+- id: ats024-040-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Predict the start order and failure behavior of init containers
+    and native sidecars
+  source_readings:
+  - sections/section-040/module-03/course-02-init-containers-and-native-sidecars.md
+  prompt: 'A Pod lists, under `initContainers`, `migrate` (a normal init container)
+    and then `log-shipper` with `restartPolicy: Always`. The main container is `scout`.
+    `migrate` exits with code 1 and the Pod has `restartPolicy: OnFailure`. What do
+    you observe?'
+  options:
+  - id: a
+    text: "`log-shipper` and `scout` start, and `migrate` is ignored."
+    explanation: The kubelet runs init containers in order. `log-shipper` is after
+      `migrate`, so it waits.
+  - id: b
+    text: The Pod phase becomes `Failed` at once.
+    explanation: 'That would happen under `restartPolicy: Never`. Under `OnFailure`
+      the init container is retried.'
+  - id: c
+    text: "`scout` starts but is not ready until `migrate` succeeds."
+    explanation: Main containers start only after every init container has completed,
+      or started in the case of a sidecar.
+  - id: d
+    text: The kubelet retries `migrate` with a growing delay, the status starts with
+      `Init:`, and neither `log-shipper` nor `scout` start.
+    explanation: Correct. Init containers run in list order, and the next one starts
+      only after the previous one has succeeded. A failure is retried under `Always`
+      or `OnFailure`.
+  correct_option: d
+  explanation: Init containers run in order. A failed one blocks all later init containers
+    and the main containers, and is retried according to the restart policy.
+- id: ats024-040-q10
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Tell voluntary from involuntary disruption and name what limits
+    each
+  source_readings:
+  - sections/section-040/module-04/course-01-voluntary-and-involuntary-disruption-and-pdbs.md
+  prompt: 'The `scout` Deployment in `starfleet` has a PodDisruptionBudget with `maxUnavailable:
+    1`. Which event can this budget stop?'
+  options:
+  - id: a
+    text: The worker node loses power and all its `scout` Pods disappear.
+    explanation: A power loss is an involuntary disruption. A budget cannot refuse
+      it.
+  - id: b
+    text: An administrator runs `kubectl delete pod` on two `scout` Pods one after
+      the other.
+    explanation: Direct deletion does not use the Eviction API, so the budget does
+      not apply.
+  - id: c
+    text: The node lifecycle controller removes Pods from a node that stopped reporting.
+    explanation: Taint-based removal is a deletion by the control plane. The budget
+      does not check it.
+  - id: d
+    text: An administrator runs `kubectl drain` on a node that runs two `scout` Pods.
+    explanation: Correct. A drain uses the Eviction API, and the API server refuses
+      an eviction when `disruptionsAllowed` is 0.
+  correct_option: d
+  explanation: Only evictions that go through the Eviction API are checked against
+    a PodDisruptionBudget. Drain evicts Pods one by one through that API.
+- id: ats024-040-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Diagnose a drain that waits because of a PodDisruptionBudget
+  source_readings:
+  - sections/section-040/module-04/course-02-drain-cordon-and-eviction.md
+  prompt: "`kubectl drain` on the only worker node keeps printing retry messages.
+    `scout` has 3 replicas and a budget with `minAvailable: 3`. What is the cause
+    and the correct fix?"
+  options:
+  - id: a
+    text: The node is not cordoned. Run `kubectl cordon` and the retries stop.
+    explanation: Drain cordons the node itself, and cordon does not change the budget.
+  - id: b
+    text: 'The budget allows no disruption, so each eviction gets a 429 response.
+      Lower `minAvailable` to 2 or use `maxUnavailable: 1`.'
+    explanation: Correct. With `minAvailable` equal to the replica count, `disruptionsAllowed`
+      is 0 and the API server refuses every eviction. The drain retries until the
+      budget changes.
+  - id: c
+    text: The drain needs `--ignore-daemonsets`. Add it and the retries stop.
+    explanation: A missing flag makes drain stop before it evicts anything. It does
+      not cause retries.
+  - id: d
+    text: Delete the budget and recreate it with the same values.
+    explanation: The same values would allow no disruption again.
+  correct_option: b
+  explanation: The Eviction API returns 429 while `disruptionsAllowed` is 0, and drain
+    keeps retrying. The budget must allow at least one disruption.
+- id: ats024-040-q12
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Choose tolerationSeconds and spreading to shorten recovery after
+    a node failure
+  source_readings:
+  - sections/section-040/module-04/course-03-node-failure-and-topology-spread.md
+  prompt: A node hosting all three `scout` replicas fails. Traffic stays broken for
+    about five minutes before replacements start. The team wants replacements within
+    about one minute and wants to survive the loss of one node without losing every
+    replica. What should they set in the Pod template?
+  options:
+  - id: a
+    text: 'A PodDisruptionBudget with `minAvailable: 1`.'
+    explanation: A budget does not limit node failure and does not speed up replacement.
+  - id: b
+    text: "`tolerationSeconds: 3000` for the not-ready and unreachable taints."
+    explanation: A larger value lengthens the wait.
+  - id: c
+    text: "`tolerationSeconds: 30` for `node.kubernetes.io/not-ready` and `node.kubernetes.io/unreachable`,
+      plus a topology spread constraint on `kubernetes.io/hostname`."
+    explanation: Correct. The default toleration is 300 seconds, so a lower value
+      starts replacements sooner. The spread constraint places replicas on different
+      nodes.
+  - id: d
+    text: "`restartPolicy: Always`, which restarts the Pods on the failed node."
+    explanation: A failed node cannot restart containers. The control plane must replace
+      the Pods elsewhere.
+  correct_option: c
+  explanation: The API server adds 300-second tolerations by default. Shorter explicit
+    tolerations move Pods sooner, and a spread constraint keeps replicas on different
+    nodes.

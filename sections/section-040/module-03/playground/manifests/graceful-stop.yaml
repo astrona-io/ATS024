@@ -1,0 +1,26 @@
+# bridge: a postStart hook, a preStop hook that takes 5 seconds, a SIGTERM
+# handler, and a 45 second grace period.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bridge
+  namespace: starfleet
+spec:
+  terminationGracePeriodSeconds: 45
+  containers:
+    - name: bridge
+      image: docker.io/library/busybox:1.37.0
+      command:
+        - sh
+        - -c
+        - |
+          trap 'echo got-sigterm; exit 0' TERM
+          echo bridge-running
+          while true; do sleep 1; done
+      lifecycle:
+        postStart:
+          exec:
+            command: ["sh", "-c", "echo started > /tmp/poststart"]
+        preStop:
+          exec:
+            command: ["sh", "-c", "echo prestop-begin > /proc/1/fd/1; sleep 5; echo prestop-end > /proc/1/fd/1"]

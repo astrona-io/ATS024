@@ -1,0 +1,58 @@
+# Inject Configuration Through Environment Variables (LAB). Graded against the live cluster.
+# UNTESTED: not yet run against a live environment.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-020-02-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+
+# Starting state: Deployment scout holds literal settings and a literal password.
+bootstrap:
+  init:
+    - name: seed-lab
+      description: Create the namespaces, the ConfigMap, the Secret and the Deployment with literal values
+      type: file
+      source: bootstrap/setup.sh
+
+# Applied only by astrona test: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: prefixed-import
+      description: scout imports every key of scout-settings with the prefix SCOUT_
+      type: file
+      source: validation/validate-prefixed-import.sh
+      hint: Add envFrom with configMapRef name scout-settings and prefix SCOUT_ to the scout container.
+    - name: renamed-key
+      description: APP_MODE comes from the key mode of scout-settings
+      type: file
+      source: validation/validate-renamed-key.sh
+      hint: Use env with name APP_MODE and valueFrom configMapKeyRef, key mode.
+    - name: secret-reference
+      description: DB_PASSWORD comes from the Secret scout-db and not from a literal
+      type: file
+      source: validation/validate-secret-reference.sh
+      hint: Use valueFrom secretKeyRef with name scout-db and key password, and remove the literal value.
+    - name: no-literals-and-same-deployment
+      description: No literal setting remains and the original Deployment was edited, not replaced
+      type: file
+      source: validation/validate-no-literals.sh
+      hint: Edit Deployment scout in place and remove the env entries that have a value field.
+
+teardown:
+  keepCluster: false

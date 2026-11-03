@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+  labels:
+    project: ckad
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shuttle-config
+  namespace: starfleet
+data:
+  flags: |
+    warp=enabled
+    shields=up
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: shuttle-token
+  namespace: starfleet
+stringData:
+  token: disposable-token
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+      - name: shuttle
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - sleep 3600
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 128Mi
+        env:
+        - name: POD_NAME
+          value: shuttle-1
+        - name: CPU_MILLI
+          value: "100"

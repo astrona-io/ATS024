@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drifter-survey
+  namespace: outpost
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: survey
+      image: docker.io/library/busybox:1.37.0
+      command: ["sh", "-c", "echo survey-complete"]

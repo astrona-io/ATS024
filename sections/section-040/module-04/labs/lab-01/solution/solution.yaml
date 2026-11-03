@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: starfleet
+  annotations:
+    lab.astrona.io/seeded: "true"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      tolerations:
+      - key: node.kubernetes.io/not-ready
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 30
+      - key: node.kubernetes.io/unreachable
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 30
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: scout
+      containers:
+      - name: scout
+        image: docker.io/library/busybox:1.37.0
+        command: ["sleep", "3600"]
+        readinessProbe:
+          exec:
+            command: ["true"]
+          periodSeconds: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: scout-pdb
+  namespace: starfleet
+  annotations:
+    lab.astrona.io/seeded: "true"
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: scout
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: probe-pdb
+  namespace: starfleet
+  annotations:
+    lab.astrona.io/seeded: "true"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: probe

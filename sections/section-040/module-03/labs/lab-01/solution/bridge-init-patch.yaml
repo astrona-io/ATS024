@@ -1,0 +1,10 @@
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: write-config
+          image: docker.io/library/busybox:1.37.0
+          command: ["sh", "-c", "echo mode=survey > /work/config.txt"]
+          volumeMounts:
+            - name: work
+              mountPath: /work

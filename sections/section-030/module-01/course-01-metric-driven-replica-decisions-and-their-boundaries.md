@@ -5,89 +5,99 @@ exam_objectives:
 ---
 # Metric-Driven Replica Decisions And Their Boundaries
 
-Two replicas average one hundred percent CPU utilization against a fifty percent target. The simplified calculation suggests four replicas, but useful capacity still needs metrics, scheduling and readiness.
+Two `probe` replicas each use all the CPU they asked for, and the target says half should be enough. The HorizontalPodAutoscaler (HPA) is the control loop that turns that gap into a new replica count. This part follows one decision from the kubelet that measures a container to the number the HPA writes, so you can tell which component to blame when the number is wrong or missing.
 
 ## Learning objectives
 
-- Identify autoscaling target and metric requirements.
-- Interpret utilization relative to requests.
-- Explain stabilization and minimum or maximum bounds.
+- Identify the autoscaling target and the metric requirements of an HPA.
+- Interpret CPU utilization relative to requests.
+- Explain tolerance and the minimum and maximum bounds.
 
 ## Before you start
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+A Pod runs one or more containers. A namespace groups namespaced objects. A request is the amount of CPU or memory the scheduler reserves for a container, and the amount a CPU utilization target is measured against. The playground for this module has the `probe` Deployment (two replicas) and the client Pods `shuttle` and `drifter`, and it already has the metrics server installed.
 
-## Responsible components and behavior
+## The chain from container to replica count
 
-The HorizontalPodAutoscaler, or HPA, adjusts a supported workload's desired replica count from configured metrics. It does not directly create more nodes or rewrite every container's resource limit. Scaling decisions depend on metric availability, target interpretation and the workload's ability to provide useful capacity after replicas are added.
+The HPA is a controller inside `kube-controller-manager`. About every 15 seconds it reads each HPA object, asks the metrics API for the current measurements of the target's Pods, calculates a desired replica count, and writes that count to the target's `scale` subresource. The subresource is a small API endpoint that every scalable workload exposes. It carries the replica count, so the HPA does not need to know the Deployment's full schema.
 
-## Identify The Scaling Target
-
-The HPA references a workload with a supported scale interface. Its minimum and maximum replicas constrain the desired range. A Deployment can therefore have its replica count influenced by the HPA, while a separate process continually forcing another count can create conflicting desired-state updates.
-
-Resource metrics can express utilization relative to requests or an absolute usage value according to the configured target type. Custom and external metrics need appropriate metric APIs and adapters. An HPA definition does not automatically install those data sources.
-
-For a CPU utilization target, CPU means central processing unit. Applicable container CPU requests supply the utilization denominator. Missing required requests can prevent meaningful utilization calculation for the target. A measured consumption number without that denominator does not establish the desired percentage.
-
-## Work Through A Simplified Decision
-
-Under a simplified average utilization model, desired replicas are based on current replicas multiplied by observed utilization divided by target utilization, rounded upward. With two replicas, one hundred percent observed utilization and a fifty percent target, that simple calculation suggests four replicas.
-
-Real controller behavior includes tolerance, missing metrics, not-yet-ready Pods and stabilization or scaling policies. The simplified calculation teaches the relationship, not a promise that every observation instantly produces that exact count. A maximum of three would also constrain the final requested range.
-
-The metric must fit the application. CPU can represent useful demand for some workloads but fail to represent a queue or external bottleneck for others. An application waiting on a saturated database may have low CPU while requests are slow. Increasing frontend replicas then may increase backend pressure without fixing the limiting dependency.
-
-## From Desired Replicas To Useful Capacity
-
-Adding desired replicas causes the workload controller to create or manage more Pods. Those Pods still need scheduling capacity, image access, startup and readiness. An HPA can request more capacity while all new Pods remain Pending. It does not guarantee the cluster has suitable nodes or storage for them.
-
-A node autoscaler, when installed and configured, performs a different responsibility concerning infrastructure capacity. It has provider constraints, timing and placement limits. The presence of an HPA does not imply that node autoscaling is available or that every unschedulable Pod can be solved by adding a node.
-
-Scaling down can remove replicas that hold temporary local state or active requests. The application should handle termination and shared state appropriately. A larger count is not universally safer, and a lower count needs an availability and disruption design that fits the workload.
-
-## Stability And Diagnosis
-
-Stabilization windows and scaling policies can reduce oscillation or constrain rate of change. A fluctuating metric can otherwise repeatedly increase and decrease capacity. Interpret configured behavior and current conditions before treating a delayed decrease as proof that the controller is broken.
-
-If an HPA has no usable metrics, inspect the metric service, target and required requests. If it asks for additional replicas but none become ready, follow placement and preparation. If new ready replicas do not improve latency, investigate the application bottleneck and metric choice.
-
-Successful autoscaling is a chain from meaningful measurement to appropriate desired replicas and usable application capacity. Each step has a separate responsible component and limit. That chain explains both a configuration choice and a realistic diagnosis.
-
-## Dependency Flow
+The measurements come from a chain of components. The kubelet on each node reads container CPU and memory use from the container runtime. The metrics server (an add-on that is not part of a bare cluster) scrapes every kubelet and keeps the latest values in memory. It registers the API group `metrics.k8s.io` through an APIService object, so `kubectl top` and the HPA read the same data through the Kubernetes API server.
 
 ```mermaid
 flowchart TB
-    metric["Usable metric and configured target"] --> hpa["HPA applies bounds and behavior"]
-    hpa --> replicas["Desired workload replicas"]
-    replicas --> controller["Workload controller manages Pods"]
-    controller --> capacity["Placement, preparation and readiness"]
-    capacity --> service["Useful application capacity"]
+    K["kubelet"] -->|"container usage"| M["metrics-server"]
+    M -->|"metrics.k8s.io"| A["API server"]
+    A -->|"Pod metrics"| H["HPA controller"]
+    H -->|"scale subresource"| D["Deployment probe"]
 ```
 
-## Work through the decision
+The diagram shows that the HPA never talks to a node or a container. If the metrics server is missing, every resource-based HPA in the cluster loses its input at once.
 
-The HorizontalPodAutoscaler (HPA) uses an observed-to-target relationship to adjust the target workload's scale. Central processing unit (CPU) utilization uses the relevant resource requests as a denominator. Missing metrics or required requests can prevent a meaningful percentage calculation.
+Check that the metrics API is registered and serving. The `Available` column of the APIService must be `True`:
 
-Under the simplified model, multiply current replicas by observed utilization divided by target utilization and round upward. Real behavior also considers tolerance, missing observations, readiness and configured stabilization. The resulting desired replicas are intent: the workload controller must create Pods, nodes must fit them, and the application must serve useful work. The HPA does not directly add nodes or repair a saturated database.
+<!-- astrona:playground:renew -->
 
-```mermaid
-flowchart TB
-    N0["Metrics and request denominator"]
-    N1["HPA decision and bounds"]
-    N2["Desired workload scale"]
-    N3["Schedulable ready replicas"]
-    N4["Useful application capacity"]
-    N0 --> N1
-    N1 --> N2
-    N2 --> N3
-    N3 --> N4
+```sh
+kubectl get apiservice v1beta1.metrics.k8s.io
 ```
 
-A scale decision becomes useful only when the resulting replicas can run and relieve the actual bottleneck.
+Then read the same data the HPA reads:
 
-A scale decision becomes useful only when the resulting replicas can run and relieve the actual bottleneck.
+```sh
+kubectl top pods -n starfleet
+```
+
+The command prints one row per Pod with CPU in millicores (one thousand millicores is one CPU core) and memory in mebibytes. If it fails with a message that the metrics API is not available, the HPA would fail in the same way.
+
+## The target and the bounds
+
+An HPA names its target in `scaleTargetRef`: an `apiVersion`, a `kind` and a `name` in the HPA's own namespace. Deployments, StatefulSets and ReplicaSets support the scale subresource, and so do custom resources that define it. `minReplicas` and `maxReplicas` bound every decision. The minimum defaults to 1 and the maximum has no default, so you must set it.
+
+The HPA owns the replica count of its target. If the Deployment manifest also sets `spec.replicas` and you re-apply that manifest, you overwrite the HPA's decision until the next sync. The usual habit is to leave `replicas` out of a manifest once an HPA manages the workload.
+
+## The calculation and its tolerance
+
+For a utilization target, the controller uses this relation, where the metric values are averages over the target's Pods:
+
+```text
+desiredReplicas = ceil[ currentReplicas * ( currentMetricValue / desiredMetricValue ) ]
+```
+
+Two `probe` replicas that average 100 percent against a 50 percent target give `ceil[ 2 * (100 / 50) ]`, which is 4. A maximum of 3 would cap the result at 3. The same two replicas at 52 percent give a ratio of 1.04, and the controller does nothing, because it skips changes while the ratio is within a tolerance of 0.1 (10 percent) of 1.0. The tolerance stops the replica count from changing for tiny differences.
+
+The controller also protects the average from bad data. It ignores Pods that are being deleted or have failed. It treats a Pod with no metric yet as if it used 0 percent when the HPA wants to scale up, and as if it used 100 percent when the HPA wants to scale down. It also holds back Pods that are not ready yet, because a Pod that is still starting often uses unusual amounts of CPU. These rules lean toward the safer result in each direction.
+
+## Why requests matter
+
+Utilization means usage divided by the request. A `probe` container that uses 15 millicores and requests 10 millicores is at 150 percent. The same container with no CPU request has no denominator. The HPA then cannot calculate a percentage, reports `FailedGetResourceMetric` or `missing request for cpu`, and sets the condition `ScalingActive` to `False`. The fix is a request on every container of the Pod, not a different target.
+
+Changing a request changes the percentage without changing the load. Doubling a request halves the utilization the HPA sees, so the same traffic produces fewer replicas. Treat the request as part of the autoscaling configuration, and set it from observed use.
+
+## Does the metric describe the bottleneck?
+
+A CPU target helps only when more replicas lower the CPU of each replica. A `probe` that waits on a saturated database uses little CPU while its responses get slower. The HPA then sees low utilization and adds nothing, or adds replicas that put more load on the database. Choose a metric that rises when the real limit is reached, such as requests per second per Pod, and accept that this needs a metrics adapter that serves a custom or external metrics API.
+
+Desired replicas are also not capacity. The Deployment controller creates the Pods, the scheduler needs free node resources to place them, and the readiness probe decides when they receive traffic. An HPA that asks for 10 replicas while only 6 fit leaves 4 Pods in `Pending`, and the HPA does not add nodes.
+
+## Reading the raw measurement
+
+`kubectl top` formats the answer of the metrics API for you. You can also ask the API server for the raw object, which shows exactly what the HPA receives: one entry per Pod, with a timestamp, a window length and the usage of each container.
+
+```sh
+kubectl get --raw /apis/metrics.k8s.io/v1beta1/namespaces/starfleet/pods
+```
+
+The response is JSON. Each item has a `timestamp` and a `window`, which is the period the kubelet averaged over. Values are quantities such as nanocores for CPU. If the timestamp is old, the metrics server has stopped scraping, and the HPA decides from stale data or reports an error.
+
+## Worked example with the maximum
+
+Suppose `probe` has `minReplicas: 2` and `maxReplicas: 3`, a target of 50 percent and a current average of 100 percent over two replicas. The formula gives 4, the maximum cuts it to 3, and the HPA sets `ScalingLimited` to `True` with the reason `TooManyReplicas`. If the average then falls to 60 percent over three replicas, the ratio is 1.2 and the formula gives `ceil[ 3 * 1.2 ]`, which is 4, and the cap holds the count at 3 again. Only an average clearly below the target, outside the tolerance, moves the count down.
+
+## What you now know
+
+You know the path from the kubelet through the metrics server and the API server to the HPA, how the controller turns an average and a target into a replica count, and why requests and tolerance change the result. The open question is how to write the HPA object and how to read its status when the result is not what you expected.
 
 ## Common pitfalls
 
 > [!WARNING]
-> HPA changes workload replica intent, not node capacity or every resource limit. Metrics, requests, stabilization, placement and application bottlenecks determine whether a replica change provides useful service.
+> An HPA changes replica counts only. It does not add nodes, and it does not change requests or limits. A missing CPU request, a missing metrics server, or a metric that does not follow the bottleneck all produce a replica count that looks wrong while the controller is working as designed.

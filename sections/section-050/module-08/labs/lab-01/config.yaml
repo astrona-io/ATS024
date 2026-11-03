@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Protect A Critical Workload With Priority And QoS (LAB). Graded against the live cluster. UNTESTED: not yet run against a live environment.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-050-08-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+    - name: seed-fault
+      description: Fill the worker node and leave scout Pending
+      type: file
+      source: bootstrap/setup.sh
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: priorityclass-critical-service
+      description: The PriorityClass critical-service has value 100000 and is not the global default
+      type: file
+      source: validation/validate-priorityclass.sh
+      hint: Create a PriorityClass with value 100000. Leave globalDefault false.
+    - name: scout-running-with-priority
+      description: scout runs with the critical-service priority
+      type: file
+      source: validation/validate-scout-priority.sh
+      hint: Set priorityClassName in the pod template of the scout Deployment. The scheduler then preempts a lower-priority pod.
+    - name: scout-guaranteed
+      description: The scout pod has the Guaranteed QoS class with its original CPU request
+      type: file
+      source: validation/validate-scout-qos.sh
+      hint: Set limits equal to requests for both cpu and memory. Keep the cpu request value.
+    - name: no-shortcut
+      description: drifter keeps its replicas and requests
+      type: file
+      source: validation/validate-no-shortcut.sh
+      hint: Do not delete or shrink drifter. Priority makes room for scout.
+teardown:
+  keepCluster: false

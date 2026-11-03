@@ -1,0 +1,300 @@
+# Knowledge check for section 030. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats024-030
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: "Configure workload autoscaling"
+questions:
+  - id: ats024-030-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Predict the replica count from a utilization target and the maximum"
+    source_readings:
+      - sections/section-030/module-01/course-01-metric-driven-replica-decisions-and-their-boundaries.md
+    prompt: |-
+      The Deployment `probe` has 2 replicas, and the HPA has `maxReplicas: 3` and a CPU target of 50 percent. The Pods average 100 percent of their requests. What replica count does the HPA set?
+    options:
+      - id: a
+        text: "4"
+        explanation: "The formula gives 4, but the maximum cuts the result."
+      - id: b
+        text: "3"
+        explanation: "Correct. The formula `ceil[2 * (100 / 50)]` gives 4, and `maxReplicas` limits it to 3. The HPA also reports `ScalingLimited` as `True`."
+      - id: c
+        text: "2"
+        explanation: "Nothing would hold the count at 2, because the ratio is far outside the tolerance."
+      - id: d
+        text: "6"
+        explanation: "The HPA multiplies the count by the ratio once per decision and never beyond the maximum."
+    correct_option: b
+    explanation: "The calculation proposes 4 replicas and the `maxReplicas` bound cuts it to 3."
+
+  - id: ats024-030-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the tolerance of the HPA calculation"
+    source_readings:
+      - sections/section-030/module-01/course-01-metric-driven-replica-decisions-and-their-boundaries.md
+    prompt: |-
+      An HPA has a CPU target of 50 percent and 2 replicas. The average utilization is 52 percent. What does the controller do?
+    options:
+      - id: a
+        text: "It adds one replica, because the value is above the target."
+        explanation: "The controller ignores small differences."
+      - id: b
+        text: "It removes one replica, because rounding favors fewer Pods."
+        explanation: "Rounding does not apply here, and the value is above the target anyway."
+      - id: c
+        text: "It changes nothing, because the ratio 1.04 is within the tolerance of 0.1."
+        explanation: "Correct. The controller skips a change while the ratio of current to desired value is within 10 percent of 1.0."
+      - id: d
+        text: "It waits for the scale-down window of 300 seconds and then adds one replica."
+        explanation: "The scale-down window applies only to decreases."
+    correct_option: c
+    explanation: "The ratio is 1.04, which is inside the default tolerance of 0.1, so the replica count stays the same."
+
+  - id: ats024-030-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Diagnose an HPA that cannot read utilization"
+    source_readings:
+      - sections/section-030/module-01/course-02-replica-autoscaling-and-availability.md
+    prompt: |-
+      An HPA shows `<unknown>` for its CPU metric for ten minutes, and `ScalingActive` is `False` with a message about a missing request for CPU. The metrics server is healthy. What is the correct repair?
+    options:
+      - id: a
+        text: "Set a CPU request on every container of the target Pods."
+        explanation: "Correct. A utilization target is a percentage of the request, so each container needs one."
+      - id: b
+        text: "Raise `maxReplicas` so that the controller has room to calculate."
+        explanation: "The bounds do not affect whether the controller can read utilization."
+      - id: c
+        text: "Delete the HPA and create it with `kubectl autoscale`."
+        explanation: "The new HPA would have the same missing input."
+      - id: d
+        text: "Install a second metrics server in the namespace."
+        explanation: "The metrics server already works, and the missing input is the request."
+    correct_option: a
+    explanation: "Utilization is usage divided by the request, so the missing request must be set on the workload."
+
+  - id: ats024-030-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose a metric type for one container"
+    source_readings:
+      - sections/section-030/module-02/course-01-metric-types-and-multiple-metrics.md
+    prompt: |-
+      A Pod has an application container and a logging sidecar that uses a lot of CPU. The HPA must follow only the application container. Which metric type fits?
+    options:
+      - id: a
+        text: "`Resource`, because it reads the CPU of each container separately."
+        explanation: "`Resource` reads the sum over all containers of the Pod."
+      - id: b
+        text: "`External`, because the sidecar is outside the application."
+        explanation: "`External` reads a metric from outside the cluster through the external metrics API."
+      - id: c
+        text: "`Object`, because the container is an object in the cluster."
+        explanation: "`Object` reads a metric about one other Kubernetes object, such as an Ingress."
+      - id: d
+        text: "`ContainerResource`, with the container name."
+        explanation: "Correct. It reads the CPU or memory of one named container, so the sidecar does not distort the result."
+    correct_option: d
+    explanation: "The `ContainerResource` metric type reads one named container and ignores the others."
+
+  - id: ats024-030-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Predict the result for several metrics"
+    source_readings:
+      - sections/section-030/module-02/course-01-metric-types-and-multiple-metrics.md
+    prompt: |-
+      An HPA has a CPU metric that proposes 4 replicas and a memory metric that proposes 7 replicas. The bounds allow both. How many replicas does it set?
+    options:
+      - id: a
+        text: "7, because the controller uses the largest proposal."
+        explanation: "Correct. The controller computes a proposal per metric and takes the largest."
+      - id: b
+        text: "4, because CPU is always the first metric."
+        explanation: "The order of the metrics does not decide the result."
+      - id: c
+        text: "6, the average of the two proposals."
+        explanation: "The controller does not average the proposals."
+      - id: d
+        text: "4, because the smaller proposal is safer."
+        explanation: "The safer choice for availability is the larger count."
+    correct_option: a
+    explanation: "The controller uses the largest proposal, so one metric near its target is enough to keep the replicas."
+
+  - id: ats024-030-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Predict a scale-down with the default stabilization window"
+    source_readings:
+      - sections/section-030/module-02/course-02-scaling-behavior-and-stabilization.md
+    prompt: |-
+      The load of a workload with default HPA behavior was high four minutes ago and has been low since. The low readings alone would allow fewer replicas. What does the HPA do?
+    options:
+      - id: a
+        text: "It scales down at once, because the latest reading is low."
+        explanation: "The window keeps recent recommendations."
+      - id: b
+        text: "It scales down by 100 percent of the Pods in one period."
+        explanation: "The default policy allows a large step, but only after the window."
+      - id: c
+        text: "It never scales down without a `behavior` block."
+        explanation: "The defaults include a scale-down with a 300 second window."
+      - id: d
+        text: "It keeps the count, because the window uses the highest recommendation of the last 300 seconds."
+        explanation: "Correct. The earlier high recommendation is still inside the window."
+    correct_option: d
+    explanation: "For scale-down, the window picks the highest recommendation seen in the last 300 seconds by default."
+
+  - id: ats024-030-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use the scale precondition flags"
+    source_readings:
+      - sections/section-030/module-03/course-01-manual-scaling-and-the-scale-subresource.md
+    prompt: |-
+      A Deployment has 4 replicas. A script runs `kubectl scale --current-replicas=3 --replicas=5` on it. What happens?
+    options:
+      - id: a
+        text: "The Deployment goes to 5 replicas, and the flag is ignored."
+        explanation: "The flag is a precondition and is not ignored."
+      - id: b
+        text: "The Deployment goes to 3 replicas first and then to 5."
+        explanation: "The command does not change the count in two steps."
+      - id: c
+        text: "The command fails with an error and changes nothing, because the current count is not 3."
+        explanation: "Correct. `--current-replicas` makes the command a compare-and-set."
+      - id: d
+        text: "The HPA of the Deployment is deleted and the count is set to 5."
+        explanation: "`kubectl scale` never deletes an autoscaler."
+    correct_option: c
+    explanation: "The precondition does not hold, so the scale is refused and the replica count stays at 4."
+
+  - id: ats024-030-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read a resize that cannot be applied"
+    source_readings:
+      - sections/section-030/module-03/course-02-in-place-pod-resize.md
+    prompt: |-
+      You patch the resize subresource of a Pod to request 100 CPUs on a node that has 4. The Pod keeps running. Which statement is correct?
+    options:
+      - id: a
+        text: "The Pod is deleted and rescheduled on a larger node."
+        explanation: "A resize never moves a Pod."
+      - id: b
+        text: "The Pod keeps its old resources and shows `PodResizePending` with the reason `Infeasible`."
+        explanation: "Correct. The request is above what the node can ever give, so the kubelet does not apply it."
+      - id: c
+        text: "The API server refuses the patch because the node is too small."
+        explanation: "The API server accepts the patch. The kubelet decides whether it fits."
+      - id: d
+        text: "The Pod QoS class changes to `Burstable` until the node grows."
+        explanation: "The QoS class cannot change through a resize."
+    correct_option: b
+    explanation: "The kubelet decides whether a resize fits the node, and an impossible request is reported as `Infeasible` while the Pod runs on."
+
+  - id: ats024-030-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose a VPA update mode"
+    source_readings:
+      - sections/section-030/module-03/course-03-vertical-pod-autoscaler.md
+    prompt: |-
+      A team wants the Vertical Pod Autoscaler to set requests on new Pods only and never evict a running Pod. Which update mode do they choose?
+    options:
+      - id: a
+        text: "`Auto`"
+        explanation: "`Auto` can evict Pods to apply new recommendations."
+      - id: b
+        text: "`Recreate`"
+        explanation: "`Recreate` evicts Pods whose requests differ from the recommendation."
+      - id: c
+        text: "`Off`"
+        explanation: "`Off` only computes recommendations and sets nothing, not even on new Pods."
+      - id: d
+        text: "`Initial`"
+        explanation: "Correct. It sets the requests when a Pod is created and never evicts a running Pod."
+    correct_option: d
+    explanation: "The `Initial` mode applies the recommendation at Pod creation only."
+
+  - id: ats024-030-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain scale to zero for an event-driven worker"
+    source_readings:
+      - sections/section-030/module-04/course-01-event-driven-autoscaling-and-scale-to-zero.md
+    prompt: |-
+      A queue worker must run no Pods when the queue is empty. The cluster runs Kubernetes 1.35 with default feature gates. Which approach works?
+    options:
+      - id: a
+        text: "A KEDA `ScaledObject` with `minReplicaCount: 0` and a queue scaler."
+        explanation: "Correct. KEDA activates the workload from zero itself and manages an HPA for the range above it."
+      - id: b
+        text: "An HPA with `minReplicas: 0` and a CPU target."
+        explanation: "The API server refuses zero without the alpha feature gate `HPAScaleToZero`, and CPU does not describe a queue."
+      - id: c
+        text: "A PodDisruptionBudget with `maxUnavailable: 100%`."
+        explanation: "A budget does not change the replica count."
+      - id: d
+        text: "A node autoscaler that removes idle nodes."
+        explanation: "Node autoscalers do not change the replicas of a workload."
+    correct_option: a
+    explanation: "KEDA handles the step between zero and one replica, and the HPA handles the range above it."
+
+  - id: ats024-030-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Predict what a node autoscaler does with an unschedulable Pod"
+    source_readings:
+      - sections/section-030/module-04/course-02-node-level-autoscaling.md
+    prompt: |-
+      A Pod requests 100 CPUs. Cluster Autoscaler manages only groups of nodes with 4 CPUs each. What happens to the Pod?
+    options:
+      - id: a
+        text: "A node group grows until the total CPU is 100."
+        explanation: "The Pod needs 100 CPUs on one node, not in total."
+      - id: b
+        text: "The Pod is started with fewer CPUs."
+        explanation: "The scheduler never lowers a request."
+      - id: c
+        text: "The Pod stays `Pending`, because no node of any group could fit it."
+        explanation: "Correct. Adding a node cannot help a Pod that fits no possible node."
+      - id: d
+        text: "The HPA removes the Pod."
+        explanation: "The HPA changes replica counts and does not delete a Pending Pod."
+    correct_option: c
+    explanation: "A node autoscaler adds a node only when a new node would let the Pod schedule."
+
+  - id: ats024-030-q12
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Make a PodDisruptionBudget and an HPA minimum agree"
+    source_readings:
+      - sections/section-030/module-04/course-03-hpa-pdb-and-rollouts.md
+    prompt: |-
+      A PodDisruptionBudget requires `minAvailable: 2`. The HPA of the same Deployment has `minReplicas: 2`, and a node drain waits for the workload. Which change lets the drain finish and keeps the protection?
+    options:
+      - id: a
+        text: "Delete the PodDisruptionBudget before the drain and create it again afterwards."
+        explanation: "This removes the protection while the drain runs."
+      - id: b
+        text: "Set `minAvailable: 0` in the PodDisruptionBudget."
+        explanation: "This removes the protection."
+      - id: c
+        text: "Raise the HPA `minReplicas` to 3."
+        explanation: "Correct. With three ready Pods and `minAvailable: 2`, one eviction is allowed."
+      - id: d
+        text: "Lower the HPA `maxReplicas` to 2."
+        explanation: "The maximum does not add a ready Pod, so the budget still allows nothing."
+    correct_option: c
+    explanation: "Allowed disruptions are the healthy Pods minus the required Pods, so a larger minimum creates room for one eviction."

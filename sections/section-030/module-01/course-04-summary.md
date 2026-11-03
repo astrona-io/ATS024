@@ -5,10 +5,14 @@ exam_objectives:
 ---
 # Summary
 
-Autoscaling links meaningful metrics to desired replica count within configured bounds. Metric availability, requests and stabilization affect the actual controller decision.
+A HorizontalPodAutoscaler (HPA) is a control loop in `kube-controller-manager`. About every 15 seconds it reads Pod measurements from the metrics API, which the metrics server serves from kubelet data, calculates a desired replica count and writes it to the target's scale subresource. The calculation multiplies the current replicas by the ratio of the current value to the target and rounds up. A tolerance of 10 percent suppresses tiny changes, and `minReplicas` and `maxReplicas` cap the result.
 
-Desired replicas still need placement, preparation and readiness. Additional frontends do not universally repair a shared dependency bottleneck, and workload scaling is separate from infrastructure capacity scaling.
+CPU utilization is usage divided by the request. A container without a CPU request gives the HPA no denominator, so `ScalingActive` becomes `False`. A metric helps only when it rises with the real bottleneck, and a saturated dependency can leave the CPU low while users wait.
 
-Availability depends on useful replicas and resilient dependencies, not on desired replica count alone.
+The HPA changes replica counts and nothing else. New Pods still need free node resources, image pulls and readiness, and a node autoscaler or a person must supply nodes. A PodDisruptionBudget limits voluntary disruption and must agree with the HPA minimum. The HPA owns the replica count of its target, so manifests for autoscaled workloads leave `replicas` out.
+
+- `kubectl describe hpa` shows `AbleToScale`, `ScalingActive` and `ScalingLimited` with reasons.
+- `kubectl autoscale` creates a CPU target only; behavior and extra metrics need an `autoscaling/v2` manifest.
+- Scale-down waits for a 300 second stabilization window by default.
 
 <!-- astrona:playground:destroy -->

@@ -16,10 +16,12 @@ This module develops placement Rules And Node Eligibility. It connects the inten
 
 ## Before You Start
 
-Examples describe system behavior. No runtime is required. Read each field or diagnostic name as part of the stated contract.
+Use the module playground for guided practice. Graded exercises use independent environments and follow the readings they practise.
 
 ## Reading Order
 
 1. Filtering, Scoring And Placement Rules
 2. Taints, Tolerations And Eligibility
 3. Summary
+
+<!-- astrona:playground -->

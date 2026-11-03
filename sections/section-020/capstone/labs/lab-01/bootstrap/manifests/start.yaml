@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+  labels:
+    project: outpost
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: beacon
+  namespace: outpost
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: beacon-settings
+  namespace: outpost
+data:
+  LOG_LEVEL: info
+  REGION: outpost
+  mode: standby
+  banner: |
+    Outpost beacon online
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: beacon-db
+  namespace: outpost
+stringData:
+  password: disposable-pass
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: registry-creds
+  namespace: outpost
+type: Opaque
+stringData:
+  .dockerconfigjson: '{"auths":{"registry.old.example":{"username":"beacon","password":"old-pass"}}}'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: outpost
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      serviceAccountName: beacon
+      containers:
+      - name: beacon
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - sleep 3600
+        env:
+        - name: LOG_LEVEL
+          value: debug
+        - name: DB_PASSWORD
+          value: disposable-pass

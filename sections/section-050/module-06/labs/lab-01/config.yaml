@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Enforce Defaults And Quotas In A Namespace (LAB). Graded against the live cluster. UNTESTED: not yet run against a live environment.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-050-06-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+    - name: seed-fault
+      description: Create the starting state with the fault
+      type: file
+      source: bootstrap/setup.sh
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: drifter-running-with-defaults
+      description: The drifter Deployment is available and its pods carry the default requests and limits
+      type: file
+      source: validation/validate-drifter-running.sh
+      hint: The quota needs requests and limits on every pod. Add a LimitRange with defaultRequest and default, then restart the rollout.
+    - name: limitrange-defaults
+      description: A LimitRange in outpost sets the required defaults and the maximum
+      type: file
+      source: validation/validate-limitrange.sh
+      hint: Use type Container with defaultRequest cpu 100m and memory 64Mi, default cpu 200m and memory 128Mi, and max cpu 500m and memory 256Mi.
+    - name: max-enforced
+      description: A container above the maximum is rejected and a valid one is accepted
+      type: file
+      source: validation/validate-max-enforced.sh
+      hint: Test with a server-side dry run. A limit of cpu 1 must be rejected by the LimitRange maximum.
+    - name: quota-object-count
+      description: The quota still has its compute limits and also caps Deployments at 3
+      type: file
+      source: validation/validate-quota.sh
+      hint: Edit the ResourceQuota compute and add count/deployments.apps with the value 3. Do not remove or raise the other values.
+teardown:
+  keepCluster: false

@@ -1,9 +1,11 @@
+---
 training:
   id: ATS024
   title: 'CKA: Workloads & Scheduling'
-  description: Detailed reading lessons and reusable YAML knowledge checks covering
-    the CKA domain. No new labs or playgrounds. Technical content remains draft for
-    review.
+  description: Detailed reading lessons, module playgrounds, graded labs, section
+    capstones and knowledge checks covering the CKA Workloads & Scheduling domain.
+    Labs and playgrounds are UNTESTED (static checks only). Technical content remains
+    draft for review.
   certification:
     name: Certified Kubernetes Administrator
     code: CKA
@@ -36,9 +38,10 @@ modules:
 - id: module-010
   title: Understand application deployments and how to perform rolling update and
     rollbacks
-  description: Developed explanations and application reasoning for Understand application
-    deployments and how to perform rolling update and rollbacks.
-  maturity: alpha
+  description: Rolling updates, revision history and rollbacks, deployment strategies,
+    StatefulSet and DaemonSet updates, Kustomize and Helm, with hands-on labs and
+    a capstone.
+  status: alpha
   content:
   - type: reading
     title: Understand application deployments and how to perform rolling update and
@@ -51,7 +54,7 @@ modules:
     title: Rolling Updates And Health Gates
     path: sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
   - type: reading
-    title: Perform A Rolling Template Update — Task
+    title: Perform A Rolling Template Update - Task
     path: sections/section-010/module-01/labs/lab-01/question.md
   - type: lab
     title: Perform A Rolling Template Update
@@ -66,13 +69,13 @@ modules:
     - cka
     - rolling-update
   - type: reading
-    title: Perform A Rolling Template Update — Solution
+    title: Perform A Rolling Template Update - Solution
     path: sections/section-010/module-01/labs/lab-01/solution.md
   - type: reading
     title: Calculating Rollout Capacity And Diagnosing Progress
     path: sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
   - type: reading
-    title: Recover A Failed Deployment Update — Task
+    title: Recover A Failed Deployment Update - Task
     path: sections/section-010/module-01/labs/lab-02/question.md
   - type: lab
     title: Recover A Failed Deployment Update
@@ -87,7 +90,7 @@ modules:
     - cka
     - rollout
   - type: reading
-    title: Recover A Failed Deployment Update — Solution
+    title: Recover A Failed Deployment Update - Solution
     path: sections/section-010/module-01/labs/lab-02/solution.md
   - type: reading
     title: 'Guided Practice: Perform A Rolling Template Update'
@@ -95,11 +98,129 @@ modules:
   - type: reading
     title: Summary
     path: sections/section-010/module-01/course-04-summary.md
+  - type: reading
+    title: Revision History And Rollbacks
+    path: sections/section-010/module-02/course.md
+  - type: reading
+    title: Revision History And ReplicaSet Ownership
+    path: sections/section-010/module-02/course-01-revision-history-and-replicaset-ownership.md
+  - type: reading
+    title: Rolling Back, Pausing And Resuming
+    path: sections/section-010/module-02/course-02-rolling-back-pausing-and-resuming.md
+  - type: reading
+    title: Roll Back To A Specific Revision - Task
+    path: sections/section-010/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Roll Back To A Specific Revision
+    path: sections/section-010/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: rollback
+    task_kind: build
+    learning_goals:
+    - Use the rollout history to return a faulty Deployment to a chosen revision.
+    tags:
+    - cka
+    - rollback
+    - deployment
+  - type: reading
+    title: Roll Back To A Specific Revision - Solution
+    path: sections/section-010/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-02/course-03-summary.md
+  - type: reading
+    title: Update Strategies For Deployments, StatefulSets And DaemonSets
+    path: sections/section-010/module-03/course.md
+  - type: reading
+    title: 'Deployment Strategies: Recreate, Blue-Green And Canary'
+    path: sections/section-010/module-03/course-01-deployment-strategies-recreate-blue-green-and-canary.md
+  - type: reading
+    title: Updating StatefulSets And DaemonSets
+    path: sections/section-010/module-03/course-02-updating-statefulsets-and-daemonsets.md
+  - type: reading
+    title: Stage A StatefulSet Update With A Partition - Task
+    path: sections/section-010/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Stage A StatefulSet Update With A Partition
+    path: sections/section-010/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: statefulset-partition
+    task_kind: build
+    learning_goals:
+    - Update only the highest StatefulSet ordinals with a partition.
+    tags:
+    - cka
+    - statefulset
+    - rolling-update
+  - type: reading
+    title: Stage A StatefulSet Update With A Partition - Solution
+    path: sections/section-010/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-03/course-03-summary.md
+  - type: reading
+    title: Managing Deployments With Kustomize And Helm
+    path: sections/section-010/module-04/course.md
+  - type: reading
+    title: Kustomize Bases, Overlays And Patches
+    path: sections/section-010/module-04/course-01-kustomize-bases-overlays-and-patches.md
+  - type: reading
+    title: Build A Kustomize Production Overlay - Task
+    path: sections/section-010/module-04/labs/lab-01/question.md
+  - type: lab
+    title: Build A Kustomize Production Overlay
+    path: sections/section-010/module-04/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: kustomize
+    task_kind: build
+    learning_goals:
+    - Write a base and an overlay with image, replica, prefix and label changes and
+      apply it.
+    tags:
+    - cka
+    - kustomize
+  - type: reading
+    title: Build A Kustomize Production Overlay - Solution
+    path: sections/section-010/module-04/labs/lab-01/solution.md
+  - type: reading
+    title: 'Helm Releases: Upgrade, History And Rollback'
+    path: sections/section-010/module-04/course-02-helm-releases-upgrade-history-and-rollback.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-04/course-03-summary.md
+  - type: reading
+    title: 'Capstone: Recover From A Faulty Update And Ship A Safe Release - Task'
+    path: sections/section-010/capstone/labs/lab-01/question.md
+  - type: lab
+    title: 'Capstone: Recover From A Faulty Update And Ship A Safe Release'
+    path: sections/section-010/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 35m
+    topic: rollout-capstone
+    task_kind: build
+    learning_goals:
+    - Roll back a faulty update, set a safe strategy and ship a new version with a
+      change cause.
+    tags:
+    - cka
+    - capstone
+    - rollback
+  - type: reading
+    title: 'Capstone: Recover From A Faulty Update And Ship A Safe Release - Solution'
+    path: sections/section-010/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Understand application deployments and how to perform
+      rolling update and rollbacks'
+    path: sections/section-010/quiz.yaml
+    pass_score: 70
 - id: module-020
   title: Use ConfigMaps and Secrets to configure applications
-  description: Developed explanations and application reasoning for Use ConfigMaps
+  description: Developed explanations, practice and a capstone for Use ConfigMaps
     and Secrets to configure applications.
-  maturity: alpha
+  status: alpha
   content:
   - type: reading
     title: Use ConfigMaps and Secrets to configure applications
@@ -155,11 +276,174 @@ modules:
   - type: reading
     title: Summary
     path: sections/section-020/module-01/course-04-summary.md
+  - type: reading
+    title: Create ConfigMaps And Secrets And Inject Environment Variables
+    path: sections/section-020/module-02/course.md
+  - type: reading
+    title: Creating ConfigMaps And Secrets With kubectl
+    path: sections/section-020/module-02/course-01-creating-configmaps-and-secrets-with-kubectl.md
+  - type: reading
+    title: Environment Variables From ConfigMaps And Secrets
+    path: sections/section-020/module-02/course-02-environment-variables-from-configmaps-and-secrets.md
+  - type: reading
+    title: Inject Configuration Through Environment Variables — Task
+    path: sections/section-020/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Inject Configuration Through Environment Variables
+    path: sections/section-020/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: environment-injection
+    task_kind: build
+    learning_goals:
+    - Import a ConfigMap with envFrom and a prefix, rename a key with configMapKeyRef,
+      and move a password to secretKeyRef.
+    - Edit a Deployment in place without deleting it.
+    tags:
+    - cka
+    - envfrom
+    - secretkeyref
+    resources:
+    - name: Define Environment Variables for a Container
+      url: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    - name: Configure a Pod to Use a ConfigMap
+      url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
+  - type: reading
+    title: Inject Configuration Through Environment Variables — Solution
+    path: sections/section-020/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Volume Selection, Immutability And Update Rules
+    path: sections/section-020/module-02/course-03-volume-selection-immutability-and-update-rules.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-02/course-04-summary.md
+  - type: reading
+    title: Secret Types And Special Uses
+    path: sections/section-020/module-03/course.md
+  - type: reading
+    title: Secret Types And Required Keys
+    path: sections/section-020/module-03/course-01-secret-types-and-required-keys.md
+  - type: reading
+    title: TLS And Registry Credential Secrets
+    path: sections/section-020/module-03/course-02-tls-and-registry-credential-secrets.md
+  - type: reading
+    title: Image Pull Secrets On Pods And ServiceAccounts
+    path: sections/section-020/module-03/course-03-image-pull-secrets-on-pods-and-service-accounts.md
+  - type: reading
+    title: Attach Registry Credentials And Serve A TLS Secret — Task
+    path: sections/section-020/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Attach Registry Credentials And Serve A TLS Secret
+    path: sections/section-020/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 30m
+    topic: secret-types
+    task_kind: build
+    learning_goals:
+    - Replace a Secret of the wrong type with a dockerconfigjson Secret.
+    - Attach image pull credentials through a ServiceAccount.
+    - Create a TLS Secret and mount it read-only with mode 0400.
+    tags:
+    - cka
+    - secret-types
+    - imagepullsecrets
+    - tls
+    resources:
+    - name: Secrets
+      url: https://kubernetes.io/docs/concepts/configuration/secret/
+    - name: Pull an Image from a Private Registry
+      url: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    - name: Configure Service Accounts for Pods
+      url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  - type: reading
+    title: Attach Registry Credentials And Serve A TLS Secret — Solution
+    path: sections/section-020/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Protecting Secrets With RBAC And Encryption At Rest
+    path: sections/section-020/module-03/course-04-protecting-secrets-with-rbac-and-encryption-at-rest.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-03/course-05-summary.md
+  - type: reading
+    title: Projected Volumes, The Downward API And Configuration Patterns
+    path: sections/section-020/module-04/course.md
+  - type: reading
+    title: 'Projected Volumes: Combining Configuration Sources'
+    path: sections/section-020/module-04/course-01-projected-volumes-combining-configuration-sources.md
+  - type: reading
+    title: 'The Downward API: Pod And Container Facts'
+    path: sections/section-020/module-04/course-02-the-downward-api-pod-and-container-facts.md
+  - type: reading
+    title: Merge Configuration Into One Projected Volume — Task
+    path: sections/section-020/module-04/labs/lab-01/question.md
+  - type: lab
+    title: Merge Configuration Into One Projected Volume
+    path: sections/section-020/module-04/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 30m
+    topic: projected-volume
+    task_kind: build
+    learning_goals:
+    - Combine a ConfigMap, a Secret and the downward API in one projected volume with
+      paths and file modes.
+    - Replace literal variables with fieldRef and resourceFieldRef references.
+    tags:
+    - cka
+    - projected-volume
+    - downward-api
+    resources:
+    - name: Projected Volumes
+      url: https://kubernetes.io/docs/concepts/storage/projected-volumes/
+    - name: Expose Pod Information to Containers Through Environment Variables
+      url: https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/
+    - name: Expose Pod Information to Containers Through Files
+      url: https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/
+  - type: reading
+    title: Merge Configuration Into One Projected Volume — Solution
+    path: sections/section-020/module-04/labs/lab-01/solution.md
+  - type: reading
+    title: Command Arguments And Configuration Patterns
+    path: sections/section-020/module-04/course-03-command-arguments-and-configuration-patterns.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-04/course-04-summary.md
+  - type: reading
+    title: Configure An Application With ConfigMaps And Secrets — Task
+    path: sections/section-020/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Configure An Application With ConfigMaps And Secrets
+    path: sections/section-020/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 30m
+    topic: configuration-capstone
+    task_kind: build
+    learning_goals:
+    - Fix environment injection, registry credentials, a projected volume and an immutable
+      ConfigMap on one Deployment.
+    tags:
+    - cka
+    - capstone
+    - configmap
+    - secret
+    resources:
+    - name: ConfigMaps
+      url: https://kubernetes.io/docs/concepts/configuration/configmap/
+    - name: Secrets
+      url: https://kubernetes.io/docs/concepts/configuration/secret/
+    - name: Projected Volumes
+      url: https://kubernetes.io/docs/concepts/storage/projected-volumes/
+  - type: reading
+    title: Configure An Application With ConfigMaps And Secrets — Solution
+    path: sections/section-020/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Use ConfigMaps and Secrets to configure applications'
+    path: sections/section-020/quiz.yaml
+    pass_score: 70
 - id: module-030
   title: Configure workload autoscaling
   description: Developed explanations and application reasoning for Configure workload
     autoscaling.
-  maturity: alpha
+  status: alpha
   content:
   - type: reading
     title: Configure workload autoscaling
@@ -188,6 +472,11 @@ modules:
     tags:
     - cka
     - hpa
+    resources:
+    - name: Horizontal Pod Autoscaling
+      url: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    - name: HorizontalPodAutoscaler Walkthrough
+      url: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
   - type: reading
     title: Configure A Metrics-Backed Autoscaler — Solution
     path: sections/section-030/module-01/labs/lab-01/solution.md
@@ -197,12 +486,167 @@ modules:
   - type: reading
     title: Summary
     path: sections/section-030/module-01/course-04-summary.md
+  - type: reading
+    title: Tune HPA Metrics And Scaling Behavior
+    path: sections/section-030/module-02/course.md
+  - type: reading
+    title: Metric Types And Multiple Metrics
+    path: sections/section-030/module-02/course-01-metric-types-and-multiple-metrics.md
+  - type: reading
+    title: Scaling Behavior And Stabilization
+    path: sections/section-030/module-02/course-02-scaling-behavior-and-stabilization.md
+  - type: reading
+    title: Missing Requests And HPA Conditions
+    path: sections/section-030/module-02/course-03-missing-requests-and-hpa-conditions.md
+  - type: reading
+    title: Repair And Tune A Broken Autoscaler — Task
+    path: sections/section-030/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Repair And Tune A Broken Autoscaler
+    path: sections/section-030/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: hpa-behavior
+    task_kind: troubleshoot
+    learning_goals:
+    - Repair an HPA that cannot read utilization by fixing the missing CPU request.
+    - Set scale-up and scale-down policies and a stabilization window with the behavior
+      field.
+    tags:
+    - cka
+    - hpa
+    - behavior
+    resources:
+    - name: Horizontal Pod Autoscaling
+      url: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    - name: HorizontalPodAutoscaler Walkthrough
+      url: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
+  - type: reading
+    title: Repair And Tune A Broken Autoscaler — Solution
+    path: sections/section-030/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-02/course-04-summary.md
+  - type: reading
+    title: Scale Workloads Manually And Vertically
+    path: sections/section-030/module-03/course.md
+  - type: reading
+    title: Manual Scaling And The Scale Subresource
+    path: sections/section-030/module-03/course-01-manual-scaling-and-the-scale-subresource.md
+  - type: reading
+    title: In-Place Pod Resize
+    path: sections/section-030/module-03/course-02-in-place-pod-resize.md
+  - type: reading
+    title: Resize A Running Pod And Scale A Deployment — Task
+    path: sections/section-030/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Resize A Running Pod And Scale A Deployment
+    path: sections/section-030/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: vertical-scaling
+    task_kind: configure
+    learning_goals:
+    - Resize CPU of a running Pod in place through the resize subresource without
+      a restart.
+    - Scale a Deployment with kubectl scale and wait for the replicas.
+    tags:
+    - cka
+    - resize
+    - scale
+    resources:
+    - name: Resize CPU and Memory Resources assigned to Containers
+      url: https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/
+    - name: kubectl scale
+      url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
+  - type: reading
+    title: Resize A Running Pod And Scale A Deployment — Solution
+    path: sections/section-030/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Vertical Pod Autoscaler
+    path: sections/section-030/module-03/course-03-vertical-pod-autoscaler.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-03/course-04-summary.md
+  - type: reading
+    title: Plan Event-Driven And Node-Level Autoscaling
+    path: sections/section-030/module-04/course.md
+  - type: reading
+    title: Event-Driven Autoscaling And Scale To Zero
+    path: sections/section-030/module-04/course-01-event-driven-autoscaling-and-scale-to-zero.md
+  - type: reading
+    title: Node-Level Autoscaling
+    path: sections/section-030/module-04/course-02-node-level-autoscaling.md
+  - type: reading
+    title: HPA, Disruption Budgets And Rollouts
+    path: sections/section-030/module-04/course-03-hpa-pdb-and-rollouts.md
+  - type: reading
+    title: Make The Budget And The Autoscaler Agree — Task
+    path: sections/section-030/module-04/labs/lab-01/question.md
+  - type: lab
+    title: Make The Budget And The Autoscaler Agree
+    path: sections/section-030/module-04/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: pdb
+    task_kind: configure
+    learning_goals:
+    - Read the allowed disruptions of a PodDisruptionBudget.
+    - Raise the HPA minimum so that the budget allows one eviction.
+    tags:
+    - cka
+    - pdb
+    - hpa
+    resources:
+    - name: Specifying a Disruption Budget for your Application
+      url: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+    - name: Horizontal Pod Autoscaling
+      url: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  - type: reading
+    title: Make The Budget And The Autoscaler Agree — Solution
+    path: sections/section-030/module-04/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-04/course-04-summary.md
+  - type: reading
+    title: 'Capstone: Autoscale, Resize And Protect A Workload — Task'
+    path: sections/section-030/capstone/labs/lab-01/question.md
+  - type: lab
+    title: 'Capstone: Autoscale, Resize And Protect A Workload'
+    path: sections/section-030/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 30m
+    topic: autoscaling
+    task_kind: build
+    learning_goals:
+    - Repair and bound an HPA, resize a Pod in place and keep a PodDisruptionBudget
+      compatible with the autoscaler.
+    tags:
+    - cka
+    - capstone
+    - hpa
+    - pdb
+    - resize
+    resources:
+    - name: Horizontal Pod Autoscaling
+      url: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    - name: Resize CPU and Memory Resources assigned to Containers
+      url: https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/
+    - name: Specifying a Disruption Budget for your Application
+      url: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  - type: reading
+    title: 'Capstone: Autoscale, Resize And Protect A Workload — Solution'
+    path: sections/section-030/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Configure workload autoscaling'
+    path: sections/section-030/quiz.yaml
+    pass_score: 70
 - id: module-040
   title: Understand the primitives used to create robust, self-healing, application
     deployments
   description: Developed explanations and application reasoning for Understand the
     primitives used to create robust, self-healing, application deployments.
-  maturity: alpha
+  status: alpha
   content:
   - type: reading
     title: Understand the primitives used to create robust, self-healing, application
@@ -232,6 +676,11 @@ modules:
     tags:
     - cka
     - readiness-probe
+    resources:
+    - name: Pod lifecycle
+      url: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+    - name: Configure liveness readiness startup probes
+      url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   - type: reading
     title: Repair Readiness Without Removing It — Solution
     path: sections/section-040/module-01/labs/lab-01/solution.md
@@ -250,6 +699,11 @@ modules:
     tags:
     - cka
     - liveness-probe
+    resources:
+    - name: Pod lifecycle
+      url: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+    - name: Configure liveness readiness startup probes
+      url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   - type: reading
     title: Repair A Liveness Probe Port — Solution
     path: sections/section-040/module-01/labs/lab-02/solution.md
@@ -259,11 +713,182 @@ modules:
   - type: reading
     title: Summary
     path: sections/section-040/module-01/course-04-summary.md
+  - type: reading
+    title: Workload Controllers For Self-Healing
+    path: sections/section-040/module-02/course.md
+  - type: reading
+    title: ReplicaSet Ownership And Garbage Collection
+    path: sections/section-040/module-02/course-01-replicaset-ownership-and-garbage-collection.md
+  - type: reading
+    title: DaemonSet And StatefulSet
+    path: sections/section-040/module-02/course-02-daemonset-and-statefulset.md
+  - type: reading
+    title: Jobs And CronJobs
+    path: sections/section-040/module-02/course-03-jobs-and-cronjobs.md
+  - type: reading
+    title: Repair A Failed Job And A CronJob — Task
+    path: sections/section-040/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Repair A Failed Job And A CronJob
+    path: sections/section-040/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: jobs-cronjobs
+    task_kind: build
+    tags:
+    - cka
+    - job
+    - cronjob
+    - backoff-limit
+    - concurrency-policy
+    learning_goals:
+    - Make a failed Job retry inside the same Pod and clean itself up with ttlSecondsAfterFinished.
+    - Stop a CronJob from overlapping and bound its start deadline and history.
+    resources:
+    - name: Job
+      url: https://kubernetes.io/docs/concepts/workloads/controllers/job/
+    - name: Cron jobs
+      url: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+  - type: reading
+    title: Repair A Failed Job And A CronJob — Solution
+    path: sections/section-040/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-02/course-04-summary.md
+  - type: reading
+    title: Pod Lifecycle And Restart Behavior
+    path: sections/section-040/module-03/course.md
+  - type: reading
+    title: Restart Policy, Crash Loops And Pod Status
+    path: sections/section-040/module-03/course-01-restart-policy-and-crash-loops.md
+  - type: reading
+    title: Init Containers And Native Sidecar Containers
+    path: sections/section-040/module-03/course-02-init-containers-and-native-sidecars.md
+  - type: reading
+    title: Repair A Crash-Looping Deployment And A Restarting Task Pod - Task
+    path: sections/section-040/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Repair A Crash-Looping Deployment And A Restarting Task Pod
+    path: sections/section-040/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: pod-lifecycle
+    task_kind: build
+    tags:
+    - cka
+    - init-containers
+    - restart-policy
+    - crashloopbackoff
+    learning_goals:
+    - Fix a crash loop caused by a missing prepared file by adding a run-to-completion
+      init container.
+    - Choose a restartPolicy that fits a one-time task and read the resulting Pod
+      phase.
+    resources:
+    - name: Kubernetes Pod lifecycle
+      url: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+    - name: Kubernetes init containers
+      url: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  - type: reading
+    title: Repair A Crash-Looping Deployment And A Restarting Task Pod — Solution
+    path: sections/section-040/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Lifecycle Hooks And Graceful Termination
+    path: sections/section-040/module-03/course-03-lifecycle-hooks-and-graceful-termination.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-03/course-04-summary.md
+  - type: reading
+    title: Voluntary And Involuntary Disruption
+    path: sections/section-040/module-04/course.md
+  - type: reading
+    title: Voluntary And Involuntary Disruption And PodDisruptionBudgets
+    path: sections/section-040/module-04/course-01-voluntary-and-involuntary-disruption-and-pdbs.md
+  - type: reading
+    title: Drain, Cordon And Eviction
+    path: sections/section-040/module-04/course-02-drain-cordon-and-eviction.md
+  - type: reading
+    title: Repair Pod Disruption Budgets And Node-Loss Tolerance — Task
+    path: sections/section-040/module-04/labs/lab-01/question.md
+  - type: lab
+    title: Repair Pod Disruption Budgets And Node-Loss Tolerance
+    path: sections/section-040/module-04/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: pod-disruption-budget
+    task_kind: build
+    tags:
+    - cka
+    - pod-disruption-budget
+    - eviction
+    - tolerations
+    - topology-spread
+    learning_goals:
+    - Repair a PodDisruptionBudget that allows no disruption and one whose selector
+      matches no Pod
+    - Set tolerationSeconds for not-ready and unreachable nodes
+    - Add a topology spread constraint without deleting the workload
+    resources:
+    - name: Configure pdb
+      url: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+    - name: Disruptions
+      url: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+    - name: Taint and toleration
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    - name: Topology spread constraints
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  - type: reading
+    title: Repair Pod Disruption Budgets And Node-Loss Tolerance — Solution
+    path: sections/section-040/module-04/labs/lab-01/solution.md
+  - type: reading
+    title: Node Failure And Topology Spread
+    path: sections/section-040/module-04/course-03-node-failure-and-topology-spread.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-04/course-04-summary.md
+  - type: reading
+    title: Self-Healing Deployments Capstone — Task
+    path: sections/section-040/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Self-Healing Deployments Capstone
+    path: sections/section-040/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 30m
+    topic: self-healing-deployments
+    task_kind: build
+    tags:
+    - cka
+    - readiness-probe
+    - poddisruptionbudget
+    - init-container
+    - cronjob
+    - topology-spread
+    learning_goals:
+    - Repair a readiness probe, a PodDisruptionBudget and a topology spread constraint
+      on one Deployment.
+    - Make a crash-looping Deployment start with an init container.
+    - Set concurrency, history and clean-up fields on a CronJob.
+    resources:
+    - name: Disruptions
+      url: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+    - name: Init containers
+      url: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    - name: Cron jobs
+      url: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+  - type: reading
+    title: Self-Healing Deployments Capstone — Solution
+    path: sections/section-040/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Understand the primitives used to create robust, self-healing,
+      application deployments'
+    path: sections/section-040/quiz.yaml
+    pass_score: 70
 - id: module-050
   title: Configure Pod admission and scheduling (limits, node affinity, etc.)
-  description: Developed explanations and application reasoning for Configure Pod
-    admission and scheduling (limits, node affinity, etc.).
-  maturity: alpha
+  description: Node selectors, taints, node and pod affinity, topology spread, manual
+    scheduling, resource quotas and limit ranges, admission controllers, priority
+    and quality of service, with labs and a capstone.
+  status: alpha
   content:
   - type: reading
     title: Configure Pod admission and scheduling (limits, node affinity, etc.)
@@ -354,3 +979,277 @@ modules:
   - type: reading
     title: Summary
     path: sections/section-050/module-02/course-04-summary.md
+  - type: reading
+    title: Node Affinity
+    path: sections/section-050/module-03/course.md
+  - type: reading
+    title: Node Labels And nodeSelector
+    path: sections/section-050/module-03/course-01-node-labels-and-nodeselector.md
+  - type: reading
+    title: Required Node Affinity And Operators
+    path: sections/section-050/module-03/course-02-required-node-affinity-and-operators.md
+  - type: reading
+    title: Repair Required Node Affinity — Task
+    path: sections/section-050/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Repair Required Node Affinity
+    path: sections/section-050/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 30m
+    topic: node-affinity
+    task_kind: build
+    learning_goals:
+    - Correct a required node affinity rule so that the Pods run on the intended nodes.
+    tags:
+    - cka
+    - scheduling
+    - node-affinity
+    resources:
+    - name: Assigning Pods to Nodes
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  - type: reading
+    title: Repair Required Node Affinity — Solution
+    path: sections/section-050/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Preferred Node Affinity And Weights
+    path: sections/section-050/module-03/course-03-preferred-node-affinity-and-weights.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-03/course-04-summary.md
+  - type: reading
+    title: Pod Affinity, Anti-Affinity And Topology Spread
+    path: sections/section-050/module-04/course.md
+  - type: reading
+    title: Pod Affinity And Anti-Affinity With topologyKey
+    path: sections/section-050/module-04/course-01-pod-affinity-and-anti-affinity.md
+  - type: reading
+    title: Topology Spread Constraints
+    path: sections/section-050/module-04/course-02-topology-spread-constraints.md
+  - type: reading
+    title: Rolling Updates, matchLabelKeys And Domain Selection
+    path: sections/section-050/module-04/course-03-rolling-updates-matchlabelkeys-and-domains.md
+  - type: reading
+    title: Replace Anti-Affinity With A Spread Constraint — Task
+    path: sections/section-050/module-04/labs/lab-01/question.md
+  - type: lab
+    title: Replace Anti-Affinity With A Spread Constraint
+    path: sections/section-050/module-04/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 30m
+    topic: topology-spread
+    task_kind: build
+    learning_goals:
+    - Replace a required anti-affinity rule with a topology spread constraint that
+      balances Pods across zones.
+    tags:
+    - cka
+    - scheduling
+    - topology-spread
+    resources:
+    - name: Pod Topology Spread Constraints
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  - type: reading
+    title: Replace Anti-Affinity With A Spread Constraint — Solution
+    path: sections/section-050/module-04/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-04/course-04-summary.md
+  - type: reading
+    title: Manual Scheduling, Static Pods And Scheduler Controls
+    path: sections/section-050/module-05/course.md
+  - type: reading
+    title: Manual Scheduling With nodeName
+    path: sections/section-050/module-05/course-01-manual-scheduling-with-nodename.md
+  - type: reading
+    title: Static Pods
+    path: sections/section-050/module-05/course-02-static-pods.md
+  - type: reading
+    title: Multiple Schedulers And Scheduler Profiles
+    path: sections/section-050/module-05/course-03-multiple-schedulers-and-profiles.md
+  - type: reading
+    title: Scheduling Gates, Cordon And Uncordon
+    path: sections/section-050/module-05/course-04-scheduling-gates-cordon-and-uncordon.md
+  - type: reading
+    title: Debugging Pending Pods
+    path: sections/section-050/module-05/course-05-debugging-pending-pods.md
+  - type: reading
+    title: Release Pending Pods — Task
+    path: sections/section-050/module-05/labs/lab-01/question.md
+  - type: lab
+    title: Release Pending Pods
+    path: sections/section-050/module-05/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 30m
+    topic: pending-pods
+    task_kind: build
+    learning_goals:
+    - Find and fix a scheduling gate, an unserved scheduler name and a cordoned node
+      that keep Pods Pending.
+    tags:
+    - cka
+    - scheduling
+    - debugging
+    resources:
+    - name: Scheduling Gates
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-scheduling-readiness/
+    - name: Configure Multiple Schedulers
+      url: https://kubernetes.io/docs/tasks/extend-kubernetes/configure-multiple-schedulers/
+  - type: reading
+    title: Release Pending Pods — Solution
+    path: sections/section-050/module-05/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-05/course-06-summary.md
+  - type: reading
+    title: Resource Quotas And Limit Ranges
+    path: sections/section-050/module-06/course.md
+  - type: reading
+    title: Requests, Limits, Throttling And OOM Kills
+    path: sections/section-050/module-06/course-01-requests-limits-throttling-and-oom-kills.md
+  - type: reading
+    title: Limit Ranges And Resource Quotas At Admission
+    path: sections/section-050/module-06/course-02-limit-ranges-and-resource-quotas.md
+  - type: reading
+    title: Enforce Defaults And Quotas In A Namespace — Task
+    path: sections/section-050/module-06/labs/lab-01/question.md
+  - type: lab
+    title: Enforce Defaults And Quotas In A Namespace
+    path: sections/section-050/module-06/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: limitrange-resourcequota
+    task_kind: build
+    learning_goals:
+    - Give a Deployment default requests and limits with a LimitRange
+    - Enforce a container maximum at admission
+    - Add an object count to a ResourceQuota
+    tags:
+    - cka
+    - limitrange
+    - resourcequota
+    resources:
+    - name: Limit Ranges
+      url: https://kubernetes.io/docs/concepts/policy/limit-range/
+    - name: Resource Quotas
+      url: https://kubernetes.io/docs/concepts/policy/resource-quotas/
+  - type: reading
+    title: Enforce Defaults And Quotas In A Namespace — Solution
+    path: sections/section-050/module-06/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-06/course-03-summary.md
+  - type: reading
+    title: Admission Controllers And ValidatingAdmissionPolicy
+    path: sections/section-050/module-07/course.md
+  - type: reading
+    title: The Admission Chain And Built-In Controllers
+    path: sections/section-050/module-07/course-01-the-admission-chain-and-built-in-controllers.md
+  - type: reading
+    title: ValidatingAdmissionPolicy With CEL
+    path: sections/section-050/module-07/course-02-validating-admission-policy-with-cel.md
+  - type: reading
+    title: Enforce Rules With ValidatingAdmissionPolicy — Task
+    path: sections/section-050/module-07/labs/lab-01/question.md
+  - type: lab
+    title: Enforce Rules With ValidatingAdmissionPolicy
+    path: sections/section-050/module-07/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: validating-admission-policy
+    task_kind: build
+    learning_goals:
+    - Bind an existing policy to one namespace with Deny
+    - Write a CEL policy that requires a label
+    - Bring an existing object into compliance
+    tags:
+    - cka
+    - admission
+    - validatingadmissionpolicy
+    - cel
+    resources:
+    - name: Validating Admission Policy
+      url: https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/
+    - name: Admission Controllers Reference
+      url: https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
+  - type: reading
+    title: Enforce Rules With ValidatingAdmissionPolicy — Solution
+    path: sections/section-050/module-07/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-07/course-03-summary.md
+  - type: reading
+    title: Priority, Preemption And Quality Of Service
+    path: sections/section-050/module-08/course.md
+  - type: reading
+    title: Priority Classes And Preemption
+    path: sections/section-050/module-08/course-01-priority-classes-and-preemption.md
+  - type: reading
+    title: Quality Of Service, Eviction And Pod Overhead
+    path: sections/section-050/module-08/course-02-quality-of-service-eviction-and-overhead.md
+  - type: reading
+    title: Protect A Critical Workload With Priority And QoS — Task
+    path: sections/section-050/module-08/labs/lab-01/question.md
+  - type: lab
+    title: Protect A Critical Workload With Priority And QoS
+    path: sections/section-050/module-08/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: priority-preemption-qos
+    task_kind: build
+    learning_goals:
+    - Create a PriorityClass and use it so a pending critical pod preempts a lower-priority
+      pod
+    - Make a pod Guaranteed by setting equal requests and limits
+    tags:
+    - cka
+    - priorityclass
+    - preemption
+    - qos
+    resources:
+    - name: Pod Priority and Preemption
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+    - name: Pod Quality of Service Classes
+      url: https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/
+    - name: Node-pressure Eviction
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/
+  - type: reading
+    title: Protect A Critical Workload With Priority And QoS — Solution
+    path: sections/section-050/module-08/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-08/course-03-summary.md
+  - type: reading
+    title: Place A Restricted Workload On A Dedicated Pool — Task
+    path: sections/section-050/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Place A Restricted Workload On A Dedicated Pool
+    path: sections/section-050/capstone/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 35m
+    topic: scheduling-capstone
+    task_kind: build
+    learning_goals:
+    - Combine taints, node affinity, resource requests, a spread constraint and Pod
+      Security admission for one workload.
+    tags:
+    - cka
+    - scheduling
+    - pod-security-admission
+    - capstone
+    resources:
+    - name: Taints and Tolerations
+      url: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    - name: Pod Security Admission
+      url: https://kubernetes.io/docs/concepts/security/pod-security-admission/
+  - type: reading
+    title: Place A Restricted Workload On A Dedicated Pool — Solution
+    path: sections/section-050/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Configure Pod admission and scheduling (limits, node
+      affinity, etc.)'
+    path: sections/section-050/quiz.yaml
+    pass_score: 70
+  - type: quiz
+    title: 'Final Knowledge Check: Workloads & Scheduling'
+    path: sections/final-domain-quiz.yaml
+    pass_score: 70

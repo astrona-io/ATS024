@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: outpost
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      serviceAccountName: beacon
+      containers:
+      - name: beacon
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - sleep 3600
+        envFrom:
+        - configMapRef:
+            name: beacon-settings
+          prefix: BEACON_
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: beacon-db
+              key: password
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: beacon-files
+          mountPath: /etc/beacon
+          readOnly: true
+      volumes:
+      - name: beacon-files
+        projected:
+          sources:
+          - configMap:
+              name: beacon-settings
+              items:
+              - key: banner
+                path: banner.txt
+          - secret:
+              name: beacon-db
+              items:
+              - key: password
+                path: secrets/db-password
+                mode: 0400
+          - downwardAPI:
+              items:
+              - path: pod/labels
+                fieldRef:
+                  fieldPath: metadata.labels

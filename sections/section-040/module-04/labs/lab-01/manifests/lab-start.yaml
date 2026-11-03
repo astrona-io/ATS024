@@ -1,0 +1,92 @@
+# Starting state for the disruption lab. Two faults are left in place on purpose:
+# scout-pdb allows no disruption, and probe-pdb selects no Pod.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: starfleet
+  annotations:
+    lab.astrona.io/seeded: "true"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+      - name: scout
+        image: docker.io/library/busybox:1.37.0
+        command: ["sleep", "3600"]
+        readinessProbe:
+          exec:
+            command: ["true"]
+          periodSeconds: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: scout-pdb
+  namespace: starfleet
+  annotations:
+    lab.astrona.io/seeded: "true"
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: scout
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+  annotations:
+    lab.astrona.io/seeded: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+      - name: probe
+        image: docker.io/library/busybox:1.37.0
+        command: ["sleep", "3600"]
+        readinessProbe:
+          exec:
+            command: ["true"]
+          periodSeconds: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: probe-pdb
+  namespace: starfleet
+  annotations:
+    lab.astrona.io/seeded: "true"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: probe-old

@@ -1,0 +1,57 @@
+# Merge Configuration Into One Projected Volume (LAB). Graded against the live cluster.
+# UNTESTED: not yet run against a live environment.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-020-04-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+
+# Starting state: the Deployment shuttle has no volume and two wrong literal variables.
+bootstrap:
+  init:
+    - name: seed-lab
+      description: Create the namespace, the ConfigMap, the Secret and the shuttle Deployment
+      type: file
+      source: bootstrap/setup.sh
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: projected-volume
+      description: shuttle has one projected volume with a ConfigMap, a Secret and a downward API source, mounted read-only at /etc/shuttle
+      type: file
+      source: validation/validate-projected-volume.sh
+      hint: Use one volume with projected.sources, and mount only that volume at /etc/shuttle with readOnly true.
+    - name: delivered-files
+      description: The running Pod has flags.conf, secrets/token with mode 0400 and pod/labels
+      type: file
+      source: validation/validate-delivered-files.sh
+      hint: Set path on every item. Give the token item mode 0400. The labels come from fieldPath metadata.labels.
+    - name: downward-variables
+      description: POD_NAME and CPU_MILLI come from the downward API and are correct in the running Pod
+      type: file
+      source: validation/validate-downward-variables.sh
+      hint: Use fieldRef metadata.name and resourceFieldRef limits.cpu with divisor 1m. Remove the literal values.
+    - name: same-deployment
+      description: shuttle is the original Deployment with 2 available replicas and no literal env value
+      type: file
+      source: validation/validate-same-deployment.sh
+      hint: Edit the Deployment in place. Do not delete it.
+
+teardown:
+  keepCluster: false

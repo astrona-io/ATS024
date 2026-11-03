@@ -1,0 +1,69 @@
+# Repair Pod Disruption Budgets And Node-Loss Tolerance (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-040-04-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+    - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+
+# Starting state: scout (3 replicas) behind a budget that allows no disruption,
+# and probe (2 replicas) behind a budget whose selector matches no Pod.
+bootstrap:
+  init:
+  - name: seed-cluster
+    description: Create the workloads and the faulty disruption budgets
+    type: file
+    source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+  - name: apply-solution
+    description: Apply the reference solution
+    type: file
+    source: solution/apply.sh
+  - name: wait-for-budgets
+    description: Wait until the disruption controller refreshed both budgets
+    type: file
+    source: testing/wait-for-budgets.sh
+
+validation:
+  scripts:
+  - name: scout-pdb-allows-one-disruption
+    description: scout-pdb selects 3 Pods, requires 2 healthy and allows 1 disruption
+    type: file
+    source: validation/validate-scout-pdb-allows-one-disruption.sh
+    hint: A budget can use minAvailable or maxUnavailable, never both. With 3 replicas, minAvailable 2 or maxUnavailable 1 allows one disruption.
+  - name: probe-pdb-selects-probe-pods
+    description: probe-pdb selects the 2 probe Pods
+    type: file
+    source: validation/validate-probe-pdb-selects-probe-pods.sh
+    hint: Compare the selector of probe-pdb with the labels of the probe Pods. EXPECTED PODS in kubectl get pdb shows what it selects.
+  - name: scout-tolerates-node-loss-for-30-seconds
+    description: scout tolerates the not-ready and unreachable taints for 30 seconds
+    type: file
+    source: validation/validate-scout-tolerates-node-loss-for-30-seconds.sh
+    hint: Add two NoExecute tolerations to the Pod template, one for node.kubernetes.io/not-ready and one for node.kubernetes.io/unreachable, each with tolerationSeconds 30.
+  - name: scout-spreads-across-nodes
+    description: scout has a soft spread constraint on the node name
+    type: file
+    source: validation/validate-scout-spreads-across-nodes.sh
+    hint: Use topologySpreadConstraints in the Pod template with topologyKey kubernetes.io/hostname, maxSkew 1, whenUnsatisfiable ScheduleAnyway and a labelSelector for app scout.
+  - name: workloads-kept-and-available
+    description: The workloads and budgets were repaired, not deleted
+    type: file
+    source: validation/validate-workloads-kept-and-available.sh
+    hint: Edit or apply over the existing objects. Do not delete and recreate them, and keep 3 scout and 2 probe replicas ready.
+
+teardown:
+  keepCluster: false

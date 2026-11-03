@@ -15,7 +15,7 @@ A developer may create Pods, but a proposed privileged container violates the na
 
 ## Before you start
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+You need `kubectl` and the module playground, a kind cluster with one control plane node and one worker node. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. The commands in this chapter create their own small objects, so they work whatever the playground already contains.
 
 ## Responsible components and behavior
 
@@ -72,7 +72,78 @@ flowchart TB
 
 Policy acceptance and useful protected execution require different evidence and different corrections.
 
-Policy acceptance and useful protected execution require different evidence and different corrections.
+## See the three modes act
+
+The Pod Security admission controller is part of the API server. It reads labels on a namespace, `pod-security.kubernetes.io/enforce`, `.../warn` and `.../audit`, and checks every Pod create and update against the named Pod Security Standards level: `privileged`, `baseline` or `restricted`. A fresh namespace lets the effect be seen without touching an existing workload.
+
+<!-- astrona:playground:renew -->
+
+Create a namespace that enforces `baseline` and warns about `restricted`:
+
+```sh
+kubectl create namespace pss-demo
+kubectl label namespace pss-demo pod-security.kubernetes.io/enforce=baseline pod-security.kubernetes.io/warn=restricted
+```
+
+Save this as `pod-privileged.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged
+  namespace: pss-demo
+spec:
+  containers:
+  - name: scout
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+    securityContext:
+      privileged: true
+```
+
+Apply it:
+
+```sh
+kubectl apply -f pod-privileged.yaml
+```
+
+The command fails with a Forbidden error that says the Pod violates `PodSecurity` at the level `baseline` and names the privileged container setting. The API server rejected the request, so no Pod object exists. Authorization had already allowed the request. Save this as `pod-plain.yaml`, a Pod with no special settings:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: plain
+  namespace: pss-demo
+spec:
+  containers:
+  - name: scout
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+```
+
+Apply it:
+
+```sh
+kubectl apply -f pod-plain.yaml
+```
+
+The Pod is created, because it meets `baseline`. The response also prints a warning that the Pod would violate `restricted`, listing settings such as `allowPrivilegeEscalation`, `capabilities`, `runAsNonRoot` and `seccompProfile`. That is the `warn` mode: the request is accepted and the client is told. You can preview a stronger level before enforcing it, with a server-side dry run of the label change:
+
+```sh
+kubectl label --dry-run=server --overwrite namespace pss-demo pod-security.kubernetes.io/enforce=restricted
+```
+
+The command prints warnings for every existing Pod in the namespace that would violate the new level, and changes nothing. Remove the demo namespace when you are done:
+
+```sh
+kubectl delete namespace pss-demo
+```
+
+### What the result proves
+
+The privileged Pod proves the difference between authorization and admission: the user may create Pods, and the namespace policy still rejects this one. The plain Pod proves that `warn` informs and does not block. The dry run proves a migration step: find the Pods that need a change before `enforce` makes the change mandatory.
 
 ## Common pitfalls
 

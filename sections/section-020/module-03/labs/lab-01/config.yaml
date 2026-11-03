@@ -1,0 +1,58 @@
+# Attach Registry Credentials And Serve A TLS Secret (LAB). Graded against the live cluster.
+# UNTESTED: not yet run against a live environment.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-024-lab-020-03-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+      - docker.io/library/busybox:1.37.0
+
+# Starting state: registry-creds has the wrong type, builder has no pull secret,
+# there is no TLS Secret and probe mounts nothing.
+bootstrap:
+  init:
+    - name: seed-lab
+      description: Create the namespaces, the faulty registry Secret, the ServiceAccount and the probe Deployment
+      type: file
+      source: bootstrap/setup.sh
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: registry-secret-type
+      description: registry-creds is a dockerconfigjson Secret for registry.starfleet.example
+      type: file
+      source: validation/validate-registry-secret.sh
+      hint: The type of a Secret cannot change. Delete registry-creds and create it again with kubectl create secret docker-registry.
+    - name: serviceaccount-pull-secret
+      description: ServiceAccount builder lists registry-creds and new Pods receive it
+      type: file
+      source: validation/validate-serviceaccount.sh
+      hint: Patch the ServiceAccount builder with imagePullSecrets, or add the field to its manifest.
+    - name: tls-secret
+      description: probe-tls is a kubernetes.io/tls Secret with a matching pair for probe.starfleet.svc
+      type: file
+      source: validation/validate-tls-secret.sh
+      hint: Make a certificate with openssl req -x509 and the subject /CN=probe.starfleet.svc, then use kubectl create secret tls.
+    - name: probe-mounts-tls
+      description: Deployment probe mounts probe-tls read-only at /tls with mode 0400
+      type: file
+      source: validation/validate-probe-mount.sh
+      hint: Add a secret volume with defaultMode 0400 and a read-only volumeMount at /tls to the probe container.
+
+teardown:
+  keepCluster: false

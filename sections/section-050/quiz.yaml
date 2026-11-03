@@ -1,0 +1,525 @@
+---
+schema_version: 1
+kind: question_bank
+id: ats024-050
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: section
+  id: section-050
+  title: Configure Pod admission and scheduling (limits, node affinity, etc.)
+questions:
+- id: ats024-050-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain filtering and scoring
+  source_readings:
+  - sections/section-050/module-01/course-01-filtering-scoring-and-placement-rules.md
+  prompt: A `scout` Pod is Pending. The events say `0/3 nodes are available` and list
+    a node selector mismatch on every node. One worker has plenty of free CPU. What
+    does this tell you?
+  options:
+  - id: a
+    text: Scoring ranked the free worker too low, so the scheduler skipped it.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The Pod failed the filter phase on every node. Free capacity does not matter
+      once a node is filtered out.
+    explanation: Correct. Filters remove nodes that cannot run the Pod. Scoring only
+      ranks the nodes that remain, so a node that fails the selector is never a candidate.
+  - id: c
+    text: The kubelet on the free worker refused the Pod after the scheduler chose
+      it.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: The ResourceQuota of the namespace blocked the placement.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: b
+  explanation: Filters remove nodes that cannot run the Pod. Scoring only ranks the
+    nodes that remain, so a node that fails the selector is never a candidate.
+- id: ats024-050-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Interpret taints and tolerations
+  source_readings:
+  - sections/section-050/module-01/course-02-taints-tolerations-and-eligibility.md
+  prompt: A worker has the taint `dedicated=scout:NoSchedule`. A Pod has a toleration
+    for that taint and no node affinity. Which statement is correct?
+  options:
+  - id: a
+    text: The Pod is allowed on that worker but may also run on any other eligible
+      node.
+    explanation: Correct. A toleration only makes a tainted node eligible. It does
+      not attract the Pod, and it does not change the node.
+  - id: b
+    text: The toleration removes the taint from the node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: The toleration gives the Pod a higher score on that worker.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: The Pod must run on that worker.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: a
+  explanation: A toleration only makes a tainted node eligible. It does not attract
+    the Pod, and it does not change the node.
+- id: ats024-050-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain requests and scheduling
+  source_readings:
+  - sections/section-050/module-02/course-01-expressing-resource-needs-for-every-container.md
+  prompt: Which value does the scheduler use to decide whether a Pod fits on a node?
+  options:
+  - id: a
+    text: The live usage of the node reported by the metrics server.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The size of the container image.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: The CPU and memory limits of the containers.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: The CPU and memory requests of the containers, added up and compared with
+      the node allocatable amount minus the requests already placed.
+    explanation: Correct. Scheduling uses requests. Limits are enforced at run time
+      and live usage is not part of the fit check.
+  correct_option: d
+  explanation: Scheduling uses requests. Limits are enforced at run time and live
+    usage is not part of the fit check.
+- id: ats024-050-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Interpret Pod Security admission
+  source_readings:
+  - sections/section-050/module-02/course-02-applying-pod-security-requirements-at-admission.md
+  prompt: A namespace has the labels `pod-security.kubernetes.io/enforce=restricted`
+    and `pod-security.kubernetes.io/warn=baseline`. A Pod that violates `restricted`
+    is created with `kubectl apply`. What happens?
+  options:
+  - id: a
+    text: The Pod is created and stays Pending.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The Pod is created and a warning is printed.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: The API server rejects the Pod at admission.
+    explanation: Correct. The enforce mode rejects a violating Pod at admission, before
+      it is stored. The warn mode only prints a message.
+  - id: d
+    text: The Pod is created and then evicted by the kubelet.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: c
+  explanation: The enforce mode rejects a violating Pod at admission, before it is
+    stored. The warn mode only prints a message.
+- id: ats024-050-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare nodeSelector and node affinity
+  source_readings:
+  - sections/section-050/module-03/course-01-node-labels-and-nodeselector.md
+  prompt: 'A Pod sets `nodeSelector: {disk: ssd}`. No node has the label `disk=ssd`.
+    What is the result?'
+  options:
+  - id: a
+    text: The scheduler places the Pod on any node and ignores the selector.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The Pod stays Pending because the selector is a required match.
+    explanation: Correct. A nodeSelector is a hard requirement. Without a matching
+      node, the Pod stays Pending with a FailedScheduling event.
+  - id: c
+    text: The Pod is rejected by the API server.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: The Pod is placed on the control plane node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: b
+  explanation: A nodeSelector is a hard requirement. Without a matching node, the
+    Pod stays Pending with a FailedScheduling event.
+- id: ats024-050-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Use node affinity operators
+  source_readings:
+  - sections/section-050/module-03/course-02-required-node-affinity-and-operators.md
+  prompt: A required node affinity has two entries in `nodeSelectorTerms`, and the
+    first has two `matchExpressions`. How are they combined?
+  options:
+  - id: a
+    text: The terms are combined with OR, and the expressions inside one term are
+      combined with AND.
+    explanation: Correct. A node matches when any one term matches. A term matches
+      when all of its expressions match.
+  - id: b
+    text: The terms are combined with AND, and the expressions inside one term are
+      combined with OR.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: Only the first term is used.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: Everything is combined with AND.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: a
+  explanation: A node matches when any one term matches. A term matches when all of
+    its expressions match.
+- id: ats024-050-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Use preferred node affinity weights
+  source_readings:
+  - sections/section-050/module-03/course-03-preferred-node-affinity-and-weights.md
+  prompt: A Pod has only a preferred node affinity for `disk=ssd` with weight 80.
+    No node has that label. What happens?
+  options:
+  - id: a
+    text: The scheduler adds the label to a node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The Pod is rejected at admission.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: The Pod stays Pending.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: The Pod is scheduled normally because a preference never filters nodes out.
+    explanation: Correct. A preferred rule only changes the score. It cannot make
+      the Pod unschedulable.
+  correct_option: d
+  explanation: A preferred rule only changes the score. It cannot make the Pod unschedulable.
+- id: ats024-050-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Use pod anti-affinity
+  source_readings:
+  - sections/section-050/module-04/course-01-pod-affinity-and-anti-affinity.md
+  prompt: A Deployment has three replicas and a required pod anti-affinity on `kubernetes.io/hostname`
+    against its own label. The cluster has two eligible nodes. What happens?
+  options:
+  - id: a
+    text: The third Pod runs on the control plane node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: Two Pods run and the third is Pending.
+    explanation: Correct. Required anti-affinity allows one matching Pod per host.
+      With two eligible hosts, the third Pod cannot be placed.
+  - id: c
+    text: All three Pods run, two on one node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: The Deployment is rejected at admission.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: b
+  explanation: Required anti-affinity allows one matching Pod per host. With two eligible
+    hosts, the third Pod cannot be placed.
+- id: ats024-050-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Configure topology spread
+  source_readings:
+  - sections/section-050/module-04/course-02-topology-spread-constraints.md
+  prompt: 'What does `maxSkew: 1` with `whenUnsatisfiable: DoNotSchedule` guarantee
+    for the zone key?'
+  options:
+  - id: a
+    text: Every zone has exactly one Pod.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The difference in matching Pods between any two zones stays at most one,
+      and a Pod that would break this stays Pending.
+    explanation: Correct. Skew is the difference between the most and least filled
+      domain. With DoNotSchedule the scheduler refuses placements that exceed it.
+  - id: c
+    text: Pods are never placed in the same zone twice.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: Pods only run in zones that have a taint.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: b
+  explanation: Skew is the difference between the most and least filled domain. With
+    DoNotSchedule the scheduler refuses placements that exceed it.
+- id: ats024-050-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Use matchLabelKeys in rolling updates
+  source_readings:
+  - sections/section-050/module-04/course-03-rolling-updates-matchlabelkeys-and-domains.md
+  prompt: 'Why add `matchLabelKeys: [pod-template-hash]` to a spread constraint of
+    a Deployment?'
+  options:
+  - id: a
+    text: It makes a rolling update count only Pods of the same revision, so old Pods
+      do not distort the spread of new Pods.
+    explanation: Correct. The hash label differs per revision. Using it as a key limits
+      the count to Pods of the same ReplicaSet.
+  - id: b
+    text: It disables the spread constraint during updates.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: It adds the hash to the node labels.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: It forces all Pods to the same node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: a
+  explanation: The hash label differs per revision. Using it as a key limits the count
+    to Pods of the same ReplicaSet.
+- id: ats024-050-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain static pods and nodeName
+  source_readings:
+  - sections/section-050/module-05/course-02-static-pods.md
+  prompt: You delete the mirror Pod of a static Pod with `kubectl delete pod`. What
+    happens?
+  options:
+  - id: a
+    text: The scheduler places the Pod on another node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The Deployment controller creates a replacement.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: The static Pod stops and stays stopped.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: d
+    text: The kubelet keeps the Pod running and recreates the mirror, because the
+      manifest file is still in the static Pod path.
+    explanation: Correct. The kubelet owns a static Pod and creates it from the file.
+      Only removing the file stops it.
+  correct_option: d
+  explanation: The kubelet owns a static Pod and creates it from the file. Only removing
+    the file stops it.
+- id: ats024-050-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Debug Pending Pods
+  source_readings:
+  - sections/section-050/module-05/course-05-debugging-pending-pods.md
+  prompt: A Pod is Pending and `kubectl describe pod` shows no events at all. Which
+    cause fits best?
+  options:
+  - id: a
+    text: The image cannot be pulled.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: b
+    text: The node has too little memory.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  - id: c
+    text: No scheduler acts on the Pod, for example because it has a scheduling gate
+      or names a scheduler that does not run.
+    explanation: Correct. A scheduler that fails to place a Pod writes a FailedScheduling
+      event. No events means nobody tried to schedule it.
+  - id: d
+    text: A taint excludes every node.
+    explanation: This does not describe how the scheduler or the API server behaves
+      here. See the correct option.
+  correct_option: c
+  explanation: A scheduler that fails to place a Pod writes a FailedScheduling event.
+    No events means nobody tried to schedule it.
+- id: ats024-050-q13
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Predict the effect of reaching a CPU limit and a memory limit
+  source_readings:
+  - sections/section-050/module-06/course-01-requests-limits-throttling-and-oom-kills.md
+  prompt: A container in `outpost` has a CPU limit of 200m and a memory limit of 64Mi.
+    During a load test it tries to use more than both limits. What happens?
+  options:
+  - id: a
+    text: The kubelet evicts the pod because it passed its limits.
+    explanation: Eviction happens under node pressure, not at a container limit.
+  - id: b
+    text: The container is killed for CPU and throttled for memory.
+    explanation: The two resources are reversed. CPU is the one that is slowed down.
+  - id: c
+    text: The CPU use is throttled and the container keeps running, and the memory
+      use makes the kernel kill it with the reason OOMKilled.
+    explanation: Correct. CPU is compressible, so the kernel slows the container.
+      Memory is not compressible, so the kernel out-of-memory killer ends the process.
+  - id: d
+    text: The scheduler moves the pod to a node with more capacity.
+    explanation: The scheduler uses requests when it places a pod. It does not react
+      to usage of a running pod.
+  correct_option: c
+  explanation: CPU over the limit is throttled and memory over the limit is an OOM
+    kill with the reason OOMKilled.
+- id: ats024-050-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Diagnose a Deployment that creates no pods because of a ResourceQuota
+  source_readings:
+  - sections/section-050/module-06/course-02-limit-ranges-and-resource-quotas.md
+  prompt: A namespace has a ResourceQuota with `requests.cpu` and `limits.cpu`. A
+    Deployment with no resource settings shows 0 of 2 pods ready and `kubectl get
+    pods` lists no pod at all. What is the most direct fix that keeps the quota?
+  options:
+  - id: a
+    text: Add a LimitRange with a default request and default limit for the containers,
+      then create new pods from the Deployment.
+    explanation: Correct. The LimitRanger plugin fills in the values before the quota
+      check, so the pods are admitted. The events of the ReplicaSet showed the rejection.
+  - id: b
+    text: Taint the nodes so that the scheduler places the pods.
+    explanation: The pods were never stored, so the scheduler never sees them.
+  - id: c
+    text: Raise the memory limit of the kubelet.
+    explanation: The kubelet is not involved in a quota rejection.
+  - id: d
+    text: 'Set `failurePolicy: Ignore` on the Deployment.'
+    explanation: A Deployment has no such field.
+  correct_option: a
+  explanation: A quota on CPU needs every pod to state CPU values, and a LimitRange
+    supplies them at admission.
+- id: ats024-050-q15
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Describe what a LimitRange changes and when
+  source_readings:
+  - sections/section-050/module-06/course-02-limit-ranges-and-resource-quotas.md
+  prompt: You add a LimitRange with a default memory limit to `outpost`, where `drifter`
+    pods have been running for a week without limits. What happens to the running
+    pods, and how do you give them the default?
+  options:
+  - id: a
+    text: The kubelet applies the default to the running containers within a minute.
+    explanation: The kubelet does not read LimitRange objects.
+  - id: b
+    text: The running pods are deleted and recreated automatically.
+    explanation: A LimitRange never deletes pods.
+  - id: c
+    text: The Deployment template is rewritten with the default.
+    explanation: The plugin changes the pod that is being created, not the Deployment.
+  - id: d
+    text: Nothing happens to them. The defaults are added only when a pod is created,
+      so a rollout restart gives new pods the default.
+    explanation: Correct. The LimitRanger plugin acts at admission of a new pod.
+  correct_option: d
+  explanation: LimitRange rules apply at pod creation only.
+- id: ats024-050-q16
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why a ValidatingAdmissionPolicy has no effect without
+    a binding
+  source_readings:
+  - sections/section-050/module-07/course-02-validating-admission-policy-with-cel.md
+  prompt: An administrator applies a ValidatingAdmissionPolicy that limits Deployments
+    to 3 replicas. `kubectl get validatingadmissionpolicy` lists it, and a Deployment
+    with 5 replicas is still accepted. What is missing?
+  options:
+  - id: a
+    text: A webhook service that evaluates the expression.
+    explanation: A policy is evaluated inside the API server and needs no service.
+  - id: b
+    text: A ValidatingAdmissionPolicyBinding that names the policy and sets at least
+      the action Deny.
+    explanation: Correct. A policy does nothing until a binding selects where it applies
+      and what happens on failure.
+  - id: c
+    text: A ClusterRole that allows the API server to read the policy.
+    explanation: Admission is not an RBAC check on the policy object.
+  - id: d
+    text: The feature gate for ValidatingAdmissionPolicy.
+    explanation: The feature is stable and on by default in Kubernetes 1.35.
+  correct_option: b
+  explanation: The binding makes the policy active.
+- id: ats024-050-q17
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Choose the safe failure policy for an admission webhook and
+    read admission order
+  source_readings:
+  - sections/section-050/module-07/course-01-the-admission-chain-and-built-in-controllers.md
+  prompt: 'A validating webhook runs as a pod in the cluster it protects. It matches
+    pods in all namespaces and uses `failurePolicy: Fail`. Its own pod crashes. What
+    is the risk?'
+  options:
+  - id: a
+    text: Mutating plugins run twice, so objects get duplicate defaults.
+    explanation: Failure policy does not repeat mutation.
+  - id: b
+    text: The scheduler ignores the webhook, so the pods run unchecked.
+    explanation: The scheduler does not call webhooks. The API server does.
+  - id: c
+    text: Requests that match the webhook, including the pods that would restart it,
+      are rejected, so the cluster cannot recover without removing the webhook configuration.
+    explanation: Correct. With Fail, an unreachable webhook rejects matching requests.
+      Excluding system namespaces and the webhook's own namespace avoids this.
+  - id: d
+    text: Only reads are rejected, because admission runs for reads.
+    explanation: Admission does not run for reads.
+  correct_option: c
+  explanation: A fail-closed webhook that guards its own workload can block its own
+    recovery.
+- id: ats024-050-q18
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Predict preemption and QoS results for pods that compete for
+    a full node
+  source_readings:
+  - sections/section-050/module-08/course-01-priority-classes-and-preemption.md
+  - sections/section-050/module-08/course-02-quality-of-service-eviction-and-overhead.md
+  prompt: The only worker node is full of `drifter` pods with priority 0. A new `scout`
+    pod uses a PriorityClass with value 100000 and the default `preemptionPolicy`.
+    It requests 500m CPU and 64Mi memory and sets limits of 1 CPU and 128Mi. Which
+    result is correct?
+  options:
+  - id: a
+    text: The scheduler preempts enough `drifter` pods to place `scout`, and the scout
+      pod has the QoS class Burstable because its limits differ from its requests.
+    explanation: Correct. Preemption removes lower-priority pods, and a pod whose
+      requests differ from its limits is Burstable. Priority and QoS class are independent.
+  - id: b
+    text: The scout pod stays Pending, because preemption works only for Guaranteed
+      pods.
+    explanation: Preemption depends on priority, not on the QoS class.
+  - id: c
+    text: The scout pod is Guaranteed, because it sets both requests and limits.
+    explanation: Guaranteed needs the request to equal the limit for every resource.
+  - id: d
+    text: The kubelet evicts the `drifter` pods because the node has MemoryPressure.
+    explanation: This is a scheduler preemption, not node-pressure eviction.
+  correct_option: a
+  explanation: A higher priority gives preemption, and unequal requests and limits
+    give Burstable.

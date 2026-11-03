@@ -1,0 +1,26 @@
+# Reference result for the Job. A Job pod template cannot be edited, so the
+# Job is deleted and created again with a retry policy and cleanup.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: scan-report
+  namespace: starfleet
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+      - name: data
+        emptyDir: {}
+      containers:
+      - name: scan
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - 'if [ -f /data/attempt ]; then echo scan finished; exit 0; fi; touch /data/attempt; echo first attempt fails; exit 1'
+        volumeMounts:
+        - name: data
+          mountPath: /data

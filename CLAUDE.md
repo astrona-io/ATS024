@@ -203,20 +203,18 @@ The course covers **Workloads & Scheduling**, worth **15%** of
 **Certified Kubernetes Administrator (CKA)**. It is part of **ATP005**.
 The official objectives are listed in `astrona.yaml` and mapped in `CURRICULUM.md`.
 
-### Reading-only scope
+### Playground and graded lab scope
 
-The maintainer approved the lesson plan, asked for deeper teaching, and explicitly
-requested **no labs or playgrounds**. That instruction overrides shared examples
-about hands-on environments, graded labs and playground markers. Do not create
-runtime configurations, executable exercises or playground lifecycle markers.
-The course must be usable without a cluster or installed command-line tools.
+Every module has one private ungraded playground (`playground/`) and at least one graded lab (`labs/lab-NN`). Every section ends with an integration capstone (`capstone/labs/lab-01`) and a `quiz.yaml` knowledge check (`type: quiz`, `pass_score: 70` in `astrona.yaml`). The domain closes with `sections/final-domain-quiz.yaml`. Register each lab right after the reading part it practises, with its `question.md` before and `solution.md` after. Use context guards and bounded waits; node commands may target only this environment's containers.
+
+Labs and playgrounds are built untested. Static checks only (`astrona validate -c`, `bash -n`, YAML parsing) until a live run is recorded. Mark such labs UNTESTED in their README. Record static, offline and live evidence separately.
 
 ### Teaching structure and depth
 
 Every section begins with its own introduction and measurable learning outcomes.
 Every module contains a landing page, developed teaching lessons and a final
 `# Summary` page. Put the summary after all its lessons and before the next
-module. This reading-only summary has no playground destruction marker.
+module. The summary ends with <!-- astrona:playground:destroy --> on its own line.
 
 Explain mechanisms, responsible components, realistic examples and the limits
 of each claim. Include worked reasoning and relevant failure cases. Avoid thin
@@ -226,8 +224,9 @@ self-contained-page and Mermaid rules apply throughout.
 
 ### Reusable question data
 
-Write original single-choice questions as YAML banks under section folders and
-`assessments/`. Use the versioned contract in `schemas/question-bank.schema.json`
+Write original single-choice questions as `quiz.yaml` banks in each section folder
+(format: ATS021 `sections/section-010/quiz.yaml`). The older `questions.yaml` banks and
+`assessments/` index are superseded by `quiz.yaml`; keep them only as author reference. Use the versioned contract in `schemas/question-bank.schema.json`
 and teaching order in `assessments/index.yaml`. Each bank has 5–15 questions with
 stable IDs, one correct option, per-option feedback, a measurable learning
 objective and source reading paths for author traceability.
@@ -248,4 +247,4 @@ The ATP registration remains draft until publication is approved.
 Primary author sources are recorded in `SOURCES.md`. The objective list was
 verified on 2026-10-11. Detailed reading expansions were written on 2026-10-11.
 Validate manifest paths, summary ordering, curriculum coverage and question
-contracts. Do not claim runtime verification for a reading-only course.
+contracts. Do not claim live verification until the actual runtime result has been recorded.

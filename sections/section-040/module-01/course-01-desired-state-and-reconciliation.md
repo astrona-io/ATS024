@@ -15,7 +15,7 @@ A controller replaces a lost application Pod, but the replacement cannot mount i
 
 ## Before you start
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. The module playground runs a `probe` Deployment with two replicas in the `starfleet` namespace. You can run the commands in this chapter against it.
 
 ## Responsible components and behavior
 
@@ -45,6 +45,37 @@ Reconciliation works only for the state a controller knows how to manage. A Depl
 
 Likewise, a controller may continually retry a desired change that the environment cannot satisfy. The repeated effort is useful because a missing dependency might later return, but it is not proof that the request is achievable. A practical explanation identifies the managed state, the corrective action and the dependency that still prevents completion.
 
+## Watch The Controllers Work
+
+The playground starts the `probe` Deployment with a readiness probe that points at the wrong port, so its Pods run but stay unready. That does not matter for this exercise, because replacement depends only on the Pod count. First list the Deployment, its ReplicaSet and its Pods together.
+
+<!-- astrona:playground:renew -->
+
+```sh
+kubectl -n starfleet get deployment,replicaset,pods -l app=probe
+```
+
+The output shows one Deployment, one ReplicaSet whose name is the Deployment name plus a hash of the Pod template, and two Pods whose names start with the ReplicaSet name. The `READY` column of the Deployment is `0/2`, because the readiness probe fails. The Pods are still counted as existing. Now read the owner of one Pod. The `metadata.ownerReferences` field names the object that created the Pod and is responsible for it.
+
+```sh
+kubectl -n starfleet get pods -l app=probe -o jsonpath='{.items[0].metadata.ownerReferences[0].kind}{" "}{.items[0].metadata.ownerReferences[0].name}{"\n"}'
+```
+
+The command prints `ReplicaSet` and the ReplicaSet name. The ReplicaSet in turn has an owner reference to the `probe` Deployment. The Kubernetes garbage collector uses these references: when an owner is deleted, it deletes the dependents that name it. Next delete one Pod and watch the ReplicaSet controller, which runs inside kube-controller-manager, create another one.
+
+```sh
+kubectl -n starfleet delete pod "$(kubectl -n starfleet get pods -l app=probe -o jsonpath='{.items[0].metadata.name}')" --wait=false
+kubectl -n starfleet get pods -l app=probe
+```
+
+The list shows two Pods again, but the names are different from before. The replacement is a new object with a new name and a new unique identifier. The old name is gone. If you want to see the controller's decision in words, run `kubectl -n starfleet describe replicaset -l app=probe` and read the Events section, which records the `SuccessfulCreate` events.
+
+## Spec, Status And Generation
+
+Every Deployment carries two numbers that help you see whether reconciliation is finished. The `metadata.generation` field increases each time you change the spec. The `status.observedGeneration` field is the generation that the Deployment controller last processed. When the two differ, the controller has not yet seen your latest change, and the status fields still describe the older spec.
+
+The status also reports `replicas`, `updatedReplicas`, `readyReplicas` and `availableReplicas`. These are the counts behind the three values described earlier. For `probe` in the playground, `replicas` is 2 and `readyReplicas` is 0. That difference is exactly the case of objects that exist while serving capacity is missing. `kubectl rollout status` reads these fields and waits until the counts match the spec, which is why it is a better check than only listing Pods.
+
 ## Work through the decision
 
 A specification describes requested state, and status describes current observations. A controller compares them and acts within its responsibility. For a Deployment, ReplicaSet ownership explains why deleting one child does not erase the required population.
@@ -63,8 +94,6 @@ flowchart TB
     N2 --> N3
     N3 --> N4
 ```
-
-Reconciliation connects declared intent with observed state, while independent dependencies constrain what can actually be achieved.
 
 Reconciliation connects declared intent with observed state, while independent dependencies constrain what can actually be achieved.
 

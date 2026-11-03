@@ -1,0 +1,314 @@
+# Knowledge check for section 020. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats024-020
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: section
+  id: section-020
+  title: Use ConfigMaps and Secrets to configure applications
+questions:
+- id: ats024-020-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose file or environment delivery for configuration
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: The ConfigMap `scout-settings` is edited while a Pod that imports it as
+    environment variables and a Pod that mounts it as a volume are both running. What
+    does each Pod see after the kubelet sync period?
+  options:
+  - id: a
+    text: Both Pods see the new value, because the kubelet updates the container environment.
+    explanation: Environment variables are fixed when the container starts and never
+      change.
+  - id: b
+    text: The environment Pod keeps the old value, and the volume Pod sees the new
+      file content.
+    explanation: Correct. The kubelet rewrites the files of a volume, but the environment
+      of a running container does not change.
+  - id: c
+    text: Neither Pod changes, because a ConfigMap is read only at Pod creation.
+    explanation: Volume files are refreshed by the kubelet.
+  - id: d
+    text: Only the environment Pod changes, because the API server pushes the value
+      into the process.
+    explanation: The API server does not push values into processes.
+  correct_option: b
+  explanation: The kubelet rewrites the files of a volume, but the environment of
+    a running container does not change.
+- id: ats024-020-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain which mounts receive ConfigMap updates
+  source_readings:
+  - sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
+  prompt: A container mounts one key of a ConfigMap with `subPath` at `/etc/scout/app.properties`.
+    The ConfigMap is edited. What does the container read after the kubelet sync period?
+  options:
+  - id: a
+    text: The new content, because the kubelet replaces the file.
+    explanation: Mounts with `subPath` are not updated.
+  - id: b
+    text: The new content, but only after the container restarts the file system.
+    explanation: A restart of the process alone does not change a `subPath` mount.
+  - id: c
+    text: The old content, until the Pod is recreated.
+    explanation: Correct. A `subPath` mount does not receive updates, so a new Pod
+      is needed.
+  - id: d
+    text: An empty file, because the old link is removed.
+    explanation: The file is not removed.
+  correct_option: c
+  explanation: A `subPath` mount does not receive updates, so a new Pod is needed.
+- id: ats024-020-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Import a ConfigMap into the environment with envFrom and a prefix
+  source_readings:
+  - sections/section-020/module-02/course-02-environment-variables-from-configmaps-and-secrets.md
+  prompt: 'The ConfigMap `scout-settings` has the keys `LOG_LEVEL` and `mode`. A container
+    uses `envFrom` with `configMapRef` to `scout-settings` and `prefix: SCOUT_`. Which
+    variables does the container get?'
+  options:
+  - id: a
+    text: "`LOG_LEVEL` and `mode`"
+    explanation: The prefix is added to every imported name.
+  - id: b
+    text: "`SCOUT_LOG_LEVEL` and `SCOUT_mode`"
+    explanation: Correct. The prefix is put before each key name, and the key `mode`
+      keeps its lower-case letters.
+  - id: c
+    text: "`SCOUT_` and the value of the first key"
+    explanation: The prefix does not replace the names.
+  - id: d
+    text: Only `SCOUT_LOG_LEVEL`, because lower-case keys are skipped
+    explanation: A lower-case key is still a valid variable name.
+  correct_option: b
+  explanation: The prefix is put before each key name, and the key `mode` keeps its
+    lower-case letters.
+- id: ats024-020-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: State the precedence between env and envFrom
+  source_readings:
+  - sections/section-020/module-02/course-02-environment-variables-from-configmaps-and-secrets.md
+  prompt: 'A container has `envFrom` that imports a ConfigMap with the key `LOG_LEVEL=info`,
+    and an `env` entry `LOG_LEVEL` with `value: debug`. What is the value in the running
+    container?'
+  options:
+  - id: a
+    text: "`info`, because `envFrom` is applied last."
+    explanation: An `env` entry has priority.
+  - id: b
+    text: The API server rejects the Pod because the name is duplicated.
+    explanation: The Pod is accepted.
+  - id: c
+    text: Both values joined with a comma.
+    explanation: Values are not combined.
+  - id: d
+    text: "`debug`, because an `env` entry takes precedence over `envFrom`."
+    explanation: Correct. The `env` list wins when the same name appears in both.
+  correct_option: d
+  explanation: The `env` list wins when the same name appears in both.
+- id: ats024-020-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Diagnose a missing ConfigMap key
+  source_readings:
+  - sections/section-020/module-02/course-02-environment-variables-from-configmaps-and-secrets.md
+  prompt: A container uses `configMapKeyRef` to the key `region` of `scout-settings`.
+    The ConfigMap exists, but it has no key `region`, and `optional` is not set. What
+    happens?
+  options:
+  - id: a
+    text: The container starts and the variable is empty.
+    explanation: The variable is not created empty unless the reference is optional.
+  - id: b
+    text: The Pod stays in `CreateContainerConfigError` and the container does not
+      start.
+    explanation: Correct. The kubelet cannot build the environment, so the container
+      is not created.
+  - id: c
+    text: The API server rejects the Deployment when it is applied.
+    explanation: The API server does not check that a referenced key exists.
+  - id: d
+    text: The Pod is scheduled again on another node until the key appears.
+    explanation: Another node would fail the same way.
+  correct_option: b
+  explanation: The kubelet cannot build the environment, so the container is not created.
+- id: ats024-020-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain how an immutable ConfigMap is changed
+  source_readings:
+  - sections/section-020/module-02/course-03-volume-selection-immutability-and-update-rules.md
+  prompt: 'A ConfigMap `scout-settings` has `immutable: true`. The team must change
+    one value. Which approach works?'
+  options:
+  - id: a
+    text: Edit the `data` field with `kubectl edit`.
+    explanation: The API server rejects changes to the data of an immutable object.
+  - id: b
+    text: 'Set `immutable: false` with a patch, then edit the data.'
+    explanation: The field cannot be set back to false.
+  - id: c
+    text: Create a new ConfigMap with a new name and change the Deployment to use
+      it.
+    explanation: Correct. A rollout then starts, and the old object stays for a rollback.
+  - id: d
+    text: Wait for the kubelet to refresh the object.
+    explanation: The kubelet never changes the object.
+  correct_option: c
+  explanation: A rollout then starts, and the old object stays for a rollback.
+- id: ats024-020-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the required keys of a TLS Secret
+  source_readings:
+  - sections/section-020/module-03/course-01-secret-types-and-required-keys.md
+  prompt: Which keys must a Secret of the type `kubernetes.io/tls` contain?
+  options:
+  - id: a
+    text: "`tls.crt` and `tls.key`"
+    explanation: Correct. The API server rejects a TLS Secret that misses either key.
+  - id: b
+    text: "`username` and `password`"
+    explanation: These are the keys of `kubernetes.io/basic-auth`.
+  - id: c
+    text: "`.dockerconfigjson`"
+    explanation: This is the key of `kubernetes.io/dockerconfigjson`.
+  - id: d
+    text: Any keys, because the type is only a label
+    explanation: The type fixes the required keys for built-in types.
+  correct_option: a
+  explanation: The API server rejects a TLS Secret that misses either key.
+- id: ats024-020-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain when ServiceAccount image pull secrets reach a Pod
+  source_readings:
+  - sections/section-020/module-03/course-03-image-pull-secrets-on-pods-and-service-accounts.md
+  prompt: A Deployment runs Pods as the ServiceAccount `builder`. An administrator
+    adds `imagePullSecrets` with `registry-creds` to `builder`. What happens to the
+    Pods that already run?
+  options:
+  - id: a
+    text: They receive the secret at the next kubelet sync.
+    explanation: The list is copied only when a Pod is created.
+  - id: b
+    text: They keep their current list. New Pods of the ServiceAccount receive the
+      secret at creation.
+    explanation: Correct. The ServiceAccount admission controller copies the list
+      into a Pod at creation only.
+  - id: c
+    text: They are deleted by the API server and recreated.
+    explanation: The API server does not recreate Pods for this change.
+  - id: d
+    text: Nothing changes for any Pod, because Pods must list the secret themselves.
+    explanation: The ServiceAccount list is copied into new Pods.
+  correct_option: b
+  explanation: The ServiceAccount admission controller copies the list into a Pod
+    at creation only.
+- id: ats024-020-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Evaluate the rights that expose Secret values
+  source_readings:
+  - sections/section-020/module-03/course-04-protecting-secrets-with-rbac-and-encryption-at-rest.md
+  prompt: A Role gives a ServiceAccount the verb `list` on `secrets` in `starfleet`
+    and nothing else. Which statement is correct?
+  options:
+  - id: a
+    text: The ServiceAccount cannot see values, because only `get` returns data.
+    explanation: A list response contains the full objects.
+  - id: b
+    text: The ServiceAccount can read every Secret value in `starfleet` from the list
+      response.
+    explanation: Correct. `get`, `list` and `watch` all return the data of Secrets.
+  - id: c
+    text: The ServiceAccount sees only the names of the Secrets.
+    explanation: The response includes the data field.
+  - id: d
+    text: The ServiceAccount can read the values only if encryption at rest is off.
+    explanation: Encryption at rest does not change what the API returns to an authorized
+      caller.
+  correct_option: b
+  explanation: "`get`, `list` and `watch` all return the data of Secrets."
+- id: ats024-020-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Build a projected volume from several sources
+  source_readings:
+  - sections/section-020/module-04/course-01-projected-volumes-combining-configuration-sources.md
+  prompt: An application needs one directory with a ConfigMap key, a Secret key and
+    the Pod labels. Which design does this with one mount?
+  options:
+  - id: a
+    text: Three volumes mounted at the same path.
+    explanation: Two volumes cannot share one mount path.
+  - id: b
+    text: One `projected` volume with a `configMap`, a `secret` and a `downwardAPI`
+      source, each with its own `path`.
+    explanation: Correct. The kubelet writes all sources into one directory tree.
+  - id: c
+    text: One `configMap` volume with items for the Secret key and the labels.
+    explanation: A ConfigMap volume reads only that ConfigMap.
+  - id: d
+    text: One `emptyDir` volume that the API server fills.
+    explanation: The API server does not fill an `emptyDir` volume.
+  correct_option: b
+  explanation: The kubelet writes all sources into one directory tree.
+- id: ats024-020-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: State which downward API fields update
+  source_readings:
+  - sections/section-020/module-04/course-02-the-downward-api-pod-and-container-facts.md
+  prompt: A label of a running Pod is changed. The container has the label as an environment
+    variable from `metadata.labels['tier']` and as a file from a `downwardAPI` volume
+    with `metadata.labels`. What does the container see after the kubelet sync period?
+  options:
+  - id: a
+    text: The new value in both places.
+    explanation: An environment variable is fixed at container start.
+  - id: b
+    text: The old value in both places.
+    explanation: The volume file is updated by the kubelet.
+  - id: c
+    text: The new value in the environment variable and the old value in the file.
+    explanation: The behavior is the other way around.
+  - id: d
+    text: The old value in the environment variable and the new value in the file.
+    explanation: Correct. Only the volume is refreshed, so the environment variable
+      keeps its value until the container restarts.
+  correct_option: d
+  explanation: Only the volume is refreshed, so the environment variable keeps its
+    value until the container restarts.
+- id: ats024-020-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Expose a resource limit with a divisor
+  source_readings:
+  - sections/section-020/module-04/course-02-the-downward-api-pod-and-container-facts.md
+  prompt: 'A container has the CPU limit `500m`. An environment variable uses `resourceFieldRef`
+    with `resource: limits.cpu` and `divisor: 1m`. What is its value?'
+  options:
+  - id: a
+    text: "`1`, because CPU is counted in whole cores."
+    explanation: That result belongs to the default divisor `1`, which rounds up.
+  - id: b
+    text: "`0.5`"
+    explanation: The value is an integer in units of the divisor.
+  - id: c
+    text: "`500`"
+    explanation: Correct. The limit is expressed in units of one millicore.
+  - id: d
+    text: "`500m`"
+    explanation: The suffix is not part of the value.
+  correct_option: c
+  explanation: The limit is expressed in units of one millicore.

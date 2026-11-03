@@ -1,0 +1,288 @@
+# Knowledge check for section 010. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats024-010
+course_id: ATS024
+exam_code: CKA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-010
+  title: "Understand application deployments and how to perform rolling update and rollbacks"
+questions:
+  - id: ats024-010-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Calculate the surge and unavailability limits of a rolling update"
+    source_readings:
+      - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+    prompt: "A Deployment has three replicas and uses `maxSurge: 25%` and `maxUnavailable: 25%`. How many extra Pods and how many unavailable Pods does the update allow?"
+    options:
+      - id: a
+        text: "Zero extra Pods and one unavailable Pod."
+        explanation: "Surge rounds up, so the surge is not zero."
+      - id: b
+        text: "One extra Pod and one unavailable Pod."
+        explanation: "Unavailability rounds down, so 0.75 becomes zero, not one."
+      - id: c
+        text: "One extra Pod and zero unavailable Pods."
+        explanation: "Correct. 25% of three is 0.75. Surge rounds up to one and unavailability rounds down to zero."
+      - id: d
+        text: "Two extra Pods and zero unavailable Pods."
+        explanation: "25% of three is 0.75, which rounds up to one, not two."
+    correct_option: c
+    explanation: "Correct. 25% of three is 0.75. Surge rounds up to one and unavailability rounds down to zero."
+
+  - id: ats024-010-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain how readiness gates replacement capacity in a rolling update"
+    source_readings:
+      - sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
+    prompt: "During a rolling update the new `probe` Pods are `Running` but fail their readiness probe. The old Pods keep serving. What does the Deployment do?"
+    options:
+      - id: a
+        text: "It rolls back to the previous revision at once."
+        explanation: "A Deployment never rolls back by itself."
+      - id: b
+        text: "It counts the new Pods as available because the containers run."
+        explanation: "Only ready Pods count as available."
+      - id: c
+        text: "It deletes the old Pods because the new Pods exist."
+        explanation: "Old Pods are removed only as new Pods become available."
+      - id: d
+        text: "It keeps the old Pods and reports no progress; after `progressDeadlineSeconds` it sets the condition `ProgressDeadlineExceeded`."
+        explanation: "Correct. The Deployment waits, and the deadline only reports the failure."
+    correct_option: d
+    explanation: "Correct. The Deployment waits, and the deadline only reports the failure."
+
+  - id: ats024-010-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Identify which changes create a new Deployment revision"
+    source_readings:
+      - sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
+    prompt: "Which change to the `probe` Deployment creates a new revision?"
+    options:
+      - id: a
+        text: "Running `kubectl scale` to four replicas."
+        explanation: "Scaling changes only the replica count."
+      - id: b
+        text: "Changing the value of a container environment variable in the Pod template."
+        explanation: "Correct. A changed Pod template creates a new ReplicaSet and a new revision."
+      - id: c
+        text: "Changing `maxSurge` in the strategy."
+        explanation: "The strategy is not part of the Pod template."
+      - id: d
+        text: "Editing a ConfigMap that the Pods mount."
+        explanation: "A ConfigMap is a separate object, so the template does not change."
+    correct_option: b
+    explanation: "Correct. A changed Pod template creates a new ReplicaSet and a new revision."
+
+  - id: ats024-010-q04
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain that each Deployment revision is a ReplicaSet owned by the Deployment"
+    source_readings:
+      - sections/section-010/module-02/course-01-revision-history-and-replicaset-ownership.md
+    prompt: "Where does a Deployment store the Pod template of an earlier revision?"
+    options:
+      - id: a
+        text: "In a ReplicaSet with zero replicas that the Deployment owns."
+        explanation: "Correct. Each revision is a ReplicaSet, and the annotation `deployment.kubernetes.io/revision` holds its number."
+      - id: b
+        text: "In a ConfigMap in the same namespace."
+        explanation: "The Deployment controller does not use ConfigMaps for history."
+      - id: c
+        text: "In the kubelet of the node that ran it."
+        explanation: "The kubelet keeps no template history."
+      - id: d
+        text: "In a Secret of type `helm.sh/release.v1`."
+        explanation: "That Secret type belongs to Helm releases."
+    correct_option: a
+    explanation: "Correct. Each revision is a ReplicaSet, and the annotation `deployment.kubernetes.io/revision` holds its number."
+
+  - id: ats024-010-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Set the revision history limit and the change-cause annotation"
+    source_readings:
+      - sections/section-010/module-02/course-01-revision-history-and-replicaset-ownership.md
+    prompt: "A team sets `revisionHistoryLimit: 0` on a Deployment to save objects. What is the effect?"
+    options:
+      - id: a
+        text: "Rollouts stop working."
+        explanation: "Rollouts still work."
+      - id: b
+        text: "Only the current revision is kept, and `rollout undo` has no earlier template to return to."
+        explanation: "Correct. Old ReplicaSets are removed, so there is no rollback target."
+      - id: c
+        text: "Ten revisions are kept, because zero means the default."
+        explanation: "The default of ten applies only when the field is not set."
+      - id: d
+        text: "The history is kept but hidden from `kubectl rollout history`."
+        explanation: "The ReplicaSets are deleted, not hidden."
+    correct_option: b
+    explanation: "Correct. Old ReplicaSets are removed, so there is no rollback target."
+
+  - id: ats024-010-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Roll back to a specific revision and describe what a rollback restores"
+    source_readings:
+      - sections/section-010/module-02/course-02-rolling-back-pausing-and-resuming.md
+    prompt: "Revision 4 of `probe` is faulty and revision 3 is also unwanted. How do you return to the template of revision 2?"
+    options:
+      - id: a
+        text: "`kubectl rollout undo deployment/probe`"
+        explanation: "Plain undo returns to revision 3."
+      - id: b
+        text: "`kubectl rollout resume deployment/probe --to-revision=2`"
+        explanation: "`resume` does not take a revision."
+      - id: c
+        text: "`kubectl rollout undo deployment/probe --to-revision=2`"
+        explanation: "Correct. The template of revision 2 is written back, and its ReplicaSet gets the next revision number."
+      - id: d
+        text: "`kubectl scale deployment/probe --replicas=2`"
+        explanation: "Scaling does not change the template."
+    correct_option: c
+    explanation: "Correct. The template of revision 2 is written back, and its ReplicaSet gets the next revision number."
+
+  - id: ats024-010-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the Recreate strategy when two versions must not run together"
+    source_readings:
+      - sections/section-010/module-03/course-01-deployment-strategies-recreate-blue-green-and-canary.md
+    prompt: "Version two of an application changes a file format that version one cannot read. Which strategy avoids running both versions together?"
+    options:
+      - id: a
+        text: "`RollingUpdate` with `maxSurge: 100%`."
+        explanation: "A rolling update always has an overlap."
+      - id: b
+        text: "A canary with one Pod."
+        explanation: "A canary runs both versions by design."
+      - id: c
+        text: "`Recreate`, which terminates the old Pods before it creates the new Pods."
+        explanation: "Correct. The price is downtime between the two steps."
+      - id: d
+        text: "`RollingUpdate` with `maxUnavailable: 0`."
+        explanation: "With zero unavailable Pods the overlap is longer, not shorter."
+    correct_option: c
+    explanation: "Correct. The price is downtime between the two steps."
+
+  - id: ats024-010-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Build a blue-green switch and a canary from Deployments and a Service"
+    source_readings:
+      - sections/section-010/module-03/course-01-deployment-strategies-recreate-blue-green-and-canary.md
+    prompt: "One Service selects `app: probe`. Three stable Pods and one canary Pod carry that label. About what share of connections reaches the canary?"
+    options:
+      - id: a
+        text: "About one in four, because the share follows the Pod counts."
+        explanation: "Correct. kube-proxy spreads connections over all ready backends."
+      - id: b
+        text: "Exactly one request in four, counted by the Service."
+        explanation: "The share is approximate; the Service does not count requests."
+      - id: c
+        text: "None, because a Service sends traffic to one Deployment only."
+        explanation: "A Service selects Pods by label, whatever Deployment owns them."
+      - id: d
+        text: "All, because the newest Pod is preferred."
+        explanation: "There is no preference for newer Pods."
+    correct_option: a
+    explanation: "Correct. kube-proxy spreads connections over all ready backends."
+
+  - id: ats024-010-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Stage a StatefulSet update with the partition field"
+    source_readings:
+      - sections/section-010/module-03/course-02-updating-statefulsets-and-daemonsets.md
+    prompt: "A StatefulSet has four Pods and `partition: 2`. You change the image. Which Pods update?"
+    options:
+      - id: a
+        text: "`crew-0` and `crew-1`."
+        explanation: "Only ordinals at or above the partition update."
+      - id: b
+        text: "All four Pods, one by one."
+        explanation: "The partition limits the update to two Pods."
+      - id: c
+        text: "None, because the partition blocks updates until it is zero."
+        explanation: "Ordinals at or above the partition do update."
+      - id: d
+        text: "`crew-3` and `crew-2`, in that order."
+        explanation: "Correct. Updates go from the highest ordinal down."
+    correct_option: d
+    explanation: "Correct. Updates go from the highest ordinal down."
+
+  - id: ats024-010-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Compare DaemonSet update strategies"
+    source_readings:
+      - sections/section-010/module-03/course-02-updating-statefulsets-and-daemonsets.md
+    prompt: "A DaemonSet uses `updateStrategy.type: OnDelete`. You change its image. What happens?"
+    options:
+      - id: a
+        text: "The controller replaces every Pod at once."
+        explanation: "That is not what OnDelete does."
+      - id: b
+        text: "The DaemonSet is rejected by the API server."
+        explanation: "OnDelete is valid."
+      - id: c
+        text: "The controller replaces one node Pod at a time."
+        explanation: "That describes RollingUpdate."
+      - id: d
+        text: "Nothing changes on a node until its Pod is deleted; then the new Pod uses the new template."
+        explanation: "Correct. This allows manual timing per node."
+    correct_option: d
+    explanation: "Correct. This allows manual timing per node."
+
+  - id: ats024-010-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Build a Kustomize overlay and compare it with a Helm release rollback"
+    source_readings:
+      - sections/section-010/module-04/course-01-kustomize-bases-overlays-and-patches.md
+    prompt: "An overlay sets `namePrefix: prod-` and the base Deployment is `beacon`. What name must a `replicas` entry use?"
+    options:
+      - id: a
+        text: "`prod-beacon`"
+        explanation: "The transformer matches the name from the base."
+      - id: b
+        text: "`beacon`, the name in the base"
+        explanation: "Correct. Transformers match the original name before the prefix is added."
+      - id: c
+        text: "Either name."
+        explanation: "Only the original name matches."
+      - id: d
+        text: "No name; the transformer applies to all Deployments."
+        explanation: "The `name` field is required."
+    correct_option: b
+    explanation: "Correct. Transformers match the original name before the prefix is added."
+
+  - id: ats024-010-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Roll back a Helm release and say what the rollback creates"
+    source_readings:
+      - sections/section-010/module-04/course-02-helm-releases-upgrade-history-and-rollback.md
+    prompt: "A Helm release is at revision 3. You run `helm rollback beacon 1`. What is the result?"
+    options:
+      - id: a
+        text: "Revisions 2 and 3 are deleted and revision 1 is current."
+        explanation: "A rollback keeps the history."
+      - id: b
+        text: "A new revision 4 with the content of revision 1."
+        explanation: "Correct. Helm adds a revision with the chosen content."
+      - id: c
+        text: "The release is uninstalled."
+        explanation: "Uninstall is a different command."
+      - id: d
+        text: "Only the Deployment Pod template is restored; other objects stay."
+        explanation: "Helm restores all objects of the release."
+    correct_option: b
+    explanation: "Correct. Helm adds a revision with the chosen content."

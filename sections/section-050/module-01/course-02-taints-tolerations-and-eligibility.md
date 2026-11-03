@@ -15,7 +15,7 @@ A Pod tolerates a dedicated-node taint but lands elsewhere. The toleration remov
 
 ## Before you start
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+You need `kubectl` and the module playground, a kind cluster with one control plane node and one worker node. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. The commands in this chapter create their own small objects, so they work whatever the playground already contains.
 
 ## Responsible components and behavior
 
@@ -76,7 +76,62 @@ flowchart TB
 
 Tolerations permit specific taint behavior; they do not replace selection, capacity or node-health requirements.
 
-Tolerations permit specific taint behavior; they do not replace selection, capacity or node-health requirements.
+## Read a taint and use a toleration
+
+A kind cluster already contains a taint, so you can see the mechanism without creating one. The control plane node carries the taint `node-role.kubernetes.io/control-plane` with the effect `NoSchedule`, which is why ordinary Pods run on the worker.
+
+<!-- astrona:playground:renew -->
+
+Print the taints of every node:
+
+```sh
+kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints
+```
+
+The control plane row shows the key `node-role.kubernetes.io/control-plane` and the effect `NoSchedule`. The worker row shows no taint. Now save this as `pod-tolerant.yaml`. It tolerates the taint and also selects the control plane node, because a toleration alone only permits the node:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tolerant
+  namespace: starfleet
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: scout
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 3600"]
+```
+
+Apply it:
+
+```sh
+kubectl apply -f pod-tolerant.yaml
+```
+
+Then check where it runs:
+
+```sh
+kubectl -n starfleet get pod tolerant -o wide
+```
+
+The Pod runs on the control plane node. Two fields did two different jobs: the toleration removed the taint rejection, and the node selector supplied the attraction. Delete `nodeSelector` and the Pod could land on the worker instead, which is still correct behaviour, because a toleration permits a node and never requires it. Remove the Pod when you have seen this:
+
+```sh
+kubectl -n starfleet delete pod tolerant
+```
+
+### Reading the scheduler message for taints
+
+When a Pod lacks a needed toleration, the `FailedScheduling` event contains the text "had untolerated taint" followed by the taint in braces, with its key and value. The effect is not repeated in the message, so look it up on the node. If the taint is part of a deliberate isolation rule, add a toleration and a selector. If a taint was left behind after maintenance, remove it from the node instead of weakening every workload.
+
+Taints with the effect `NoExecute` add one more rule: the node lifecycle controller evicts running Pods that do not tolerate them, and `tolerationSeconds` sets how long a Pod may stay. A taint with the effect `NoSchedule` never evicts a Pod that already runs.
 
 ## Common pitfalls
 

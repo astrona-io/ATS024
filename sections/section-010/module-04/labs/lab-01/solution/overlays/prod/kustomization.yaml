@@ -1,0 +1,14 @@
+resources:
+- ../../base
+namespace: outpost
+namePrefix: prod-
+labels:
+- pairs:
+    env: prod
+  includeTemplates: true
+images:
+- name: docker.io/library/busybox
+  newTag: "1.37.0"
+replicas:
+- name: beacon
+  count: 3

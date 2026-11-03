@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: probe
+        matchLabelKeys:
+        - pod-template-hash
+      containers:
+      - name: probe
+        image: docker.io/library/busybox:1.37.0
+        command: ["sh", "-c", "sleep 3600"]
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi

@@ -5,66 +5,134 @@ exam_objectives:
 ---
 # Secret Storage, Delivery And Rotation
 
-A database stops accepting its old password before every consumer adopts the replacement. The Secret update succeeded, yet requests fail. Credential rotation must coordinate the issuer, stored value, delivery method and running consumers.
+A database stops accepting its old password before every consumer has adopted the new one. The Secret update succeeded, yet requests fail. This part shows where a Secret is stored, how it reaches a container, and which consumers see a rotated value without a restart.
 
-## Learning objectives
+## What a Secret stores and where
 
-- Choose file or environment delivery for configuration.
-- Explain namespace and key references.
-- Distinguish input updates from application reload.
+A Secret is a Kubernetes object that holds a small amount of sensitive data, such as a password, a token or a key. Its structure looks like a ConfigMap. The `data` field holds base64-encoded values, and the `stringData` field accepts plain text that the API server encodes for you when it stores the object. A Secret is limited to 1 MiB.
 
-## Before you start
+Base64 is an encoding, not encryption. Anyone who can read the Secret through the API can decode it in one command. By default the API server writes Secrets to etcd without encryption, and the control plane operator can turn on encryption at rest. Protection comes from three separate controls: who may read the object (RBAC), whether etcd encrypts it, and how the application handles the value.
 
-This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+When a Pod uses a Secret volume, the kubelet writes the files into a `tmpfs`, which is memory on the node. The values are not written to the node disk. This limits exposure on the node, but a process in the container that can read the mount can still read the value.
 
-## Responsible components and behavior
+## Create a Secret and decode it
 
-The `scout` application uses a non-sensitive log level and a sensitive database password. A ConfigMap stores configuration data that is not intended to be secret. A Secret is a Kubernetes resource for sensitive data. Keeping both outside the image lets the same application artifact run with different deployment settings.
+The first example stores a disposable database password for the `scout` application. Use only disposable values in practice work.
 
-A Pod can receive values through environment variables or files mounted from a volume. Environment variables are set when the container starts; updating the source object does not rewrite the environment of that running process. Mounted configuration files can receive updates after a delay, but the application must notice or reload them. A mount using `subPath` does not receive those automatic volume updates.
+Save this as `secret-scout-db.yaml`:
 
-A Secret's base64 representation is an encoding, not encryption. Access control, encryption at rest and careful application behavior are separate protections. A person allowed to read a Secret can obtain its contents, and a process can accidentally expose a password by writing it to logs. The resource type alone does not make all handling safe.
+<!-- astrona:playground:renew -->
 
-Configuration needs a lifecycle plan. If an application only reads a file during startup, changing the ConfigMap requires a restart or rollout to activate the new value. If it supports reload, verify that the reload occurred. For password rotation, consider when the external database begins accepting the new value and when clients stop using the old one.
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: scout-db
+  namespace: starfleet
+type: Opaque
+stringData:
+  password: first-password
+```
 
-Suppose the log level changes but the application keeps its previous verbosity. First identify whether it reads an environment variable, a mounted file or a cached value. The correct explanation depends on how the data reaches the process, not just on whether the Kubernetes object was updated.
+Apply it:
 
-## Configuration As A Process Input
+```sh
+kubectl apply -f secret-scout-db.yaml
+```
 
-Imagine `scout` reads a log level at startup and checks a configuration file for a feature setting during each request. Updating the ConfigMap can affect these two settings differently. The startup environment remains the same until a new process receives different values. A supported mounted-file update can become visible later, but only the application logic determines when the new setting is used.
+Then read it back as the API stores it:
 
-A file update is therefore only one stage. Delivery changes the mounted data; adoption changes the application's effective behavior. An application that reads once and caches the result needs an explicit reload or restart even if its file changed correctly. An application that watches files needs to handle the update mechanism and avoid reading inconsistent intermediate state.
+```sh
+kubectl -n starfleet get secret scout-db -o jsonpath='{.data.password}'
+kubectl -n starfleet get secret scout-db -o jsonpath='{.data.password}' | base64 -d
+```
 
-Separating configuration from an image supports reuse, but it also creates a compatibility contract. Version two may require a new key that version one never used. A rollout containing both versions can need settings valid for both. A missing required key should produce a clear error rather than a silently unsafe default.
+The first command prints a base64 string, not the word you wrote. The second decodes it and prints `first-password`. This shows why a user with `get` permission on Secrets can read every value. It also shows why `stringData` never appears when you read the object back: the API server converts it into `data` and discards the `stringData` field.
 
-## Rotating Sensitive Values
+## Deliver the Secret two ways
 
-For a database password, identify the issuer, the stored Secret, the delivery method and each consumer. If the database stops accepting the old password before all clients adopt the new one, requests can fail. If the old password remains valid forever, rotation has not removed its exposure.
+A Pod can take a Secret value as an environment variable or as a file. Both paths run in the same Pod below, so you can compare them after a change.
 
-Environment-based consumers generally need new containers to receive new values. File-based consumers may need application reload. In both cases, readiness and representative requests should confirm that consumers can use the updated credential. Avoid logging the password as proof of adoption; verify authentication behavior without exposing the secret.
+Save this as `pod-secret-reader.yaml`:
 
-A Secret also needs protections beyond its resource name. Read access can reveal the credential, container access can expose mounted files and diagnostic bundles can copy them unintentionally. Handle sensitivity through permissions, storage encryption and application behavior, while preserving a clear plan for how updates become effective.
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-reader
+  namespace: starfleet
+spec:
+  containers:
+  - name: reader
+    image: docker.io/library/busybox:1.37.0
+    command:
+    - sh
+    - -c
+    - sleep 3600
+    env:
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: scout-db
+          key: password
+    volumeMounts:
+    - name: credentials
+      mountPath: /credentials
+      readOnly: true
+  volumes:
+  - name: credentials
+    secret:
+      secretName: scout-db
+```
 
-## Work through the decision
+Apply it:
 
-A Secret is a resource for sensitive data, but its serialized base64 data is encoding rather than encryption. API permissions, storage encryption and consumer behavior protect different exposure paths. Avoid retrieving full Secret YAML simply to establish that a named object exists.
+```sh
+kubectl apply -f pod-secret-reader.yaml
+kubectl -n starfleet wait --for=condition=Ready pod/secret-reader --timeout=120s
+```
 
-Rotation is a sequence of changes across systems. The issuer must accept the replacement, consumers must receive and adopt it, and the earlier value must eventually lose authority. Updating the Kubernetes object alone does not update an existing process environment or revoke the credential at its issuer. Verification should test intended access and the planned retirement behavior without printing the value.
+The field is `secretKeyRef` in the environment variable and `secretName` in the volume. Do not confuse them with the ConfigMap names `configMapKeyRef` and `name`. A wrong key name stops the container with the reason `CreateContainerConfigError`, and a missing Secret blocks the Pod in `ContainerCreating`.
+
+## Rotate the value and compare
+
+A rotation changes the password at the issuer, here an imaginary database, and in the Secret. Update the Secret with a new value:
+
+```sh
+kubectl -n starfleet patch secret scout-db --type merge -p '{"stringData":{"password":"second-password"}}'
+kubectl -n starfleet exec secret-reader -- sh -c 'echo "env: $DB_PASSWORD"; echo "file: $(cat /credentials/password)"'
+```
+
+Right after the patch, both lines still show `first-password`. After the kubelet sync, which can take a minute, run the second command again. The `file:` line shows `second-password`. The `env:` line keeps `first-password` for the whole life of the container, because the runtime sets the environment once when it creates the process.
 
 ```mermaid
 flowchart TB
-    I["Issuer accepts replacement"] --> S["Stored Secret update"]
-    S --> D["Consumer delivery"]
-    D --> A["Application adoption"]
-    A --> V["Access verification"]
-    V --> R["Earlier authority retired"]
+    S["Secret updated"] --> V["volume file updated by kubelet"]
+    S --> E["environment unchanged"]
+    V --> R["application must read the file again"]
+    E --> X["container must be restarted"]
 ```
 
-Rotation becomes effective through coordinated adoption and retirement, rather than through one stored update.
+A rotation is complete only when the consumer uses the new value, and that happens through a file re-read or through a new container.
 
-You can now describe safe credential verification without using disclosure as evidence. Each rotation plan must state how consumers adopt updates and when old authority is removed.
+For the environment path, a Deployment gets new Pods when you run `kubectl rollout restart deployment/<name>`. A rolling update keeps old Pods running until new ones are ready, so some requests can still use the old password during the rollout. Plan the order: the issuer must accept both passwords, then consumers move, then the old password is removed.
+
+## Rules that decide who sees a change
+
+A Secret or ConfigMap mounted with `subPath` never receives updates. An environment variable never receives updates. A volume with the field `immutable: true` on the Secret never receives updates either, because the object cannot change. A normal volume mount gets updates after the kubelet sync.
+
+Do not print secrets to prove a rotation worked. A log line with the password creates a second copy that outlives the Secret. Test the effect instead: for example, make an authenticated request and check the status code, or compare two values inside the container with `test` and read only the exit code.
+
+## Clean up
+
+```sh
+kubectl -n starfleet delete pod secret-reader --wait=false
+kubectl -n starfleet delete secret scout-db
+```
+
+You now know where a Secret lives, that base64 gives no protection, and that only files mounted without `subPath` follow a rotation. The open question is how to create objects quickly from the command line and how environment variables select keys.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Updating a ConfigMap or Secret does not automatically replace environment variables in running containers. Base64 data in a Secret is not encrypted merely because it is encoded.
+> Base64 data in a Secret is not encrypted. Environment variables and `subPath` mounts keep the old value after a rotation, so restart the Pods. Do not print a password to prove that it changed.
