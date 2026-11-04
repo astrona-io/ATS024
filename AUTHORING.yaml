@@ -55,14 +55,14 @@ sections:
       path: sections/section-010/module-01/labs/lab-01
       after_reading: sections/section-010/module-01/course-01-rolling-updates-and-health-gates.md
       objective: Complete a readiness-gated update with explicit rollout capacity.
-      status: draft
+      status: alpha
       runtime_verification: pending
     - id: lab-02
       path: sections/section-010/module-01/labs/lab-02
       after_reading: sections/section-010/module-01/course-02-calculating-rollout-capacity-and-diagnosing-progress.md
       objective: Restore two available replicas by correcting a failed Deployment
         image update.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-010/module-01/course-03-guided-practice.md
@@ -97,13 +97,13 @@ sections:
       after_reading: sections/section-020/module-01/course-01-configmaps-secrets-and-configuration-delivery.md
       objective: Mount non-secret configuration and verify the application actually
         reads it.
-      status: draft
+      status: alpha
       runtime_verification: pending
     - id: lab-02
       path: sections/section-020/module-01/labs/lab-02
       after_reading: sections/section-020/module-01/course-02-secret-storage-delivery-and-rotation.md
       objective: Use both a required Secret key reference and a read-only Secret volume.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-020/module-01/course-03-guided-practice.md
@@ -142,7 +142,7 @@ sections:
       after_reading: sections/section-030/module-01/course-02-replica-autoscaling-and-availability.md
       objective: Declare a resource-utilization target and verify that the controller
         reads measurements.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-030/module-01/course-03-guided-practice.md
@@ -178,14 +178,14 @@ sections:
       path: sections/section-040/module-01/labs/lab-01
       after_reading: sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
       objective: Restore endpoint eligibility by repairing a readiness probe port.
-      status: draft
+      status: alpha
       runtime_verification: pending
     - id: lab-02
       path: sections/section-040/module-01/labs/lab-02
       after_reading: sections/section-040/module-01/course-02-designing-startup-readiness-and-liveness-checks.md
       objective: Restore a valid health check while retaining restart protection and
         readiness.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-040/module-01/course-03-guided-practice.md
@@ -221,14 +221,14 @@ sections:
       after_reading: sections/section-050/module-01/course-01-filtering-scoring-and-placement-rules.md
       objective: Use node labels and scheduling evidence to correct an unsatisfiable
         placement rule.
-      status: draft
+      status: alpha
       runtime_verification: pending
     - id: lab-02
       path: sections/section-050/module-01/labs/lab-02
       after_reading: sections/section-050/module-01/course-02-taints-tolerations-and-eligibility.md
       objective: Make a workload eligible for a deliberately tainted worker without
         removing the taint.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-050/module-01/course-03-guided-practice.md
@@ -257,7 +257,7 @@ sections:
       after_reading: sections/section-050/module-02/course-02-applying-pod-security-requirements-at-admission.md
       objective: Admit a compliant Pod and reject a privileged Pod through the API
         server.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-050/module-02/course-03-guided-practice.md
