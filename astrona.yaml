@@ -507,7 +507,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 25m
     topic: hpa-behavior
-    task_kind: troubleshoot
+    task_kind: troubleshooting
     learning_goals:
     - Repair an HPA that cannot read utilization by fixing the missing CPU request.
     - Set scale-up and scale-down policies and a stabilization window with the behavior
@@ -545,7 +545,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 20m
     topic: vertical-scaling
-    task_kind: configure
+    task_kind: build
     learning_goals:
     - Resize CPU of a running Pod in place through the resize subresource without
       a restart.
@@ -589,7 +589,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 20m
     topic: pdb
-    task_kind: configure
+    task_kind: troubleshooting
     learning_goals:
     - Read the allowed disruptions of a PodDisruptionBudget.
     - Raise the HPA minimum so that the budget allows one eviction.
